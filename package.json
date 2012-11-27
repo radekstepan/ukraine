@@ -1,0 +1,10 @@
+{
+    "name": "chernobyl",
+    "description": "deploy clouds over ukraine",
+    "version": "0.1.0",
+    "dependencies": {
+        "winston": "0.6.2",
+        "colors": "0.6.0-1",
+        "flatiron": "0.3.0"
+    }
+}
