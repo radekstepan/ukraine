@@ -1,10 +1,12 @@
 {
-    "name": "chernobyl",
-    "description": "deploy clouds over ukraine",
-    "version": "0.1.0",
+    "name": "ukraine",
+    "description": "ukraine glues haibu and node-http-proxy adding a little helper, chernobyl, that deploys into this cloud",
+    "version": "0.2.0",
     "dependencies": {
         "winston": "0.6.2",
         "colors": "0.6.0-1",
-        "flatiron": "0.3.0"
+        "flatiron": "0.3.0",
+        "haibu": "0.9.7",
+        "http-proxy": "0.8.5"
     }
 }

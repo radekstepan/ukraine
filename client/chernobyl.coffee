@@ -1,5 +1,4 @@
 #!/usr/bin/env coffee 
-
 fs = require 'fs'
 winston = require 'winston'
 require 'colors'
@@ -16,8 +15,8 @@ help = ->
     winston.help ''
     winston.help 'Commands:'.cyan.underline.bold
     winston.help ''
-    winston.help 'To deploy an app into haibu'.cyan
-    winston.help '  chernobyl deploy'
+    winston.help 'To deploy an app into cloud'.cyan
+    winston.help '  chernobyl deploy <ukraine_ip>'
 
 # Startup.
 winston.info "Welcome to #{'chernobyl'.grey} comrade"
