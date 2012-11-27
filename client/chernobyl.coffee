@@ -31,7 +31,6 @@ else
                 winston.error "Path to #{'ukraine'.grey} not specified"
                 help()
             else
-                (require path.resolve(__dirname, 'chernobyl/deploy.coffee')).deploy process.argv[3], ->
-                    winston.info "Package deployed #{'ok'.green.bold}"
+                (require path.resolve(__dirname, 'chernobyl/deploy.coffee')).deploy process.argv[3]
         else
             help()
