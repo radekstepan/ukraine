@@ -1,4 +1,4 @@
-#!/usr/bin/env coffee 
+#!/usr/bin/env coffee
 fs = require 'fs'
 path = require 'path'
 

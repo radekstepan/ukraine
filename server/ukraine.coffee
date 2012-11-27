@@ -1,4 +1,4 @@
-#!/usr/bin/env coffee 
+#!/usr/bin/env coffee
 path = require 'path'
 winston = require 'winston'
 
@@ -8,7 +8,7 @@ winston.cli()
 haibu = require '../node_modules/haibu/lib/haibu.js' # direct path to local haibu!
 proxy = require 'http-proxy'
 
-# Create a proxy server listening on port 8000 routing to apps in a dynamic `routes` file.
+# Create a proxy server listening on port 80 routing to apps in a dynamic `routes` file.
 proxy.createServer('router': path.resolve(__dirname, 'routes.json')).listen(8000)
 
 # Inject our own plugin.

@@ -1,6 +1,6 @@
-#!/usr/bin/env coffee 
-fs = require 'fs'
-path = require 'path'
+#!/usr/bin/env coffee
+fs      = require 'fs'
+path    = require 'path'
 winston = require 'winston'
 require 'colors'
 
@@ -19,21 +19,19 @@ help = ->
     winston.help 'To deploy an app into cloud'.cyan
     winston.help '  chernobyl deploy <ukraine_ip>'
 
-# Startup.
 winston.info "Welcome to #{'chernobyl'.grey} comrade"
-try
-    pkg = JSON.parse fs.readFileSync path.resolve(__dirname, '../package.json')
-catch e
-    winston.error "#{'package.json'.grey} file does not exist"
 
-if pkg
-    winston.info 'v' + pkg.version
-    winston.info 'Executing command'
-
-    if process.argv.length < 3 then help()
-    else
-        switch process.argv[2]
-            when 'deploy'
-                winston.debug '    debugging'
-            else
+# Which command?
+if process.argv.length < 3 then help()
+else
+    switch process.argv[2]
+        when 'deploy'
+            # Has the user supplied a path to ukraine?
+            if process.argv.length isnt 4
+                winston.error "Path to #{'ukraine'.grey} not specified"
                 help()
+            else
+                (require path.resolve(__dirname, 'chernobyl/deploy.coffee')).deploy process.argv[3], ->
+                    winston.info "Package deployed #{'ok'.green.bold}"
+        else
+            help()

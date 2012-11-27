@@ -7,6 +7,10 @@
         "colors": "0.6.0-1",
         "flatiron": "0.3.0",
         "haibu": "0.9.7",
-        "http-proxy": "0.8.5"
+        "http-proxy": "0.8.5",
+        "tar": "0.1.13",
+        "zlib": "1.0.5",
+        "fstream": "0.1.19",
+        "request": "2.12.0"
     }
 }
