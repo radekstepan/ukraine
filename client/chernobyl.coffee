@@ -1,5 +1,6 @@
 #!/usr/bin/env coffee 
 fs = require 'fs'
+path = require 'path'
 winston = require 'winston'
 require 'colors'
 
@@ -21,7 +22,7 @@ help = ->
 # Startup.
 winston.info "Welcome to #{'chernobyl'.grey} comrade"
 try
-    pkg = JSON.parse fs.readFileSync './package.json'
+    pkg = JSON.parse fs.readFileSync path.resolve(__dirname, '../package.json')
 catch e
     winston.error "#{'package.json'.grey} file does not exist"
 
