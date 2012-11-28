@@ -24,3 +24,7 @@ haibu.drone.start
     'host': '127.0.0.1'
 , ->
     winston.info "Welcome to #{'ukraine'.grey} comrade"
+    winston.info ''
+    winston.info 'haibu'.grey + ' listening on port ' + '9002'.bold
+    winston.info 'http-proxy'.grey + ' listening on port ' + '8000'.bold
+    winston.info 'cloud apps live in ' + path.resolve(__dirname, '../node_modules/haibu/local').bold

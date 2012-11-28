@@ -69,7 +69,7 @@ task.deploy = (ukraine_ip) ->
             fstream.Reader({ 'path': APP_DIR, 'type': 'Directory' })
             .pipe(tar.Pack({ 'prefix': '.' }))
             .pipe(zlib.Gzip())
-            .pipe(request.post({'url': "http://#{ukraine_ip}:9002/deploy/username/appname"}, (err, res, body) ->
+            .pipe(request.post({'url': "http://#{ukraine_ip}:9002/deploy/#{pkg.author}/#{pkg.name}"}, (err, res, body) ->
                 if err then def.reject err
                 else if res.statusCode isnt 200 then def.reject body
                 else def.resolve pkg, body
