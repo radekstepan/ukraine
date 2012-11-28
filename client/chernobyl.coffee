@@ -10,7 +10,7 @@ winston.cli()
 # Show help.
 help = ->
     winston.help ''
-    ( winston.help line.cyan.bold for line in fs.readFileSync('logo.txt').toString('utf-8').split('\n') )
+    ( winston.help line.cyan.bold for line in fs.readFileSync(path.resolve(__dirname, 'logo.txt')).toString('utf-8').split('\n') )
     winston.help ''
     winston.help 'Deployment of Node.js cloud apps'
     winston.help ''

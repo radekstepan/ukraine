@@ -4,22 +4,30 @@ path    = require 'path'
 winston = require 'winston'
 tar     = require 'tar'
 zlib    = require 'zlib'
-fstream = require 'fstream-npm'
+fstream = require 'fstream'
 request = require 'request'
 Q       = require 'q'
 require 'colors'
 
 task = exports
 
+# Where is the app we are uploading located?
+APP_DIR = '../example_app'
+
 # CLI output on the default output.
 winston.cli()
 
 # The actual task.
 task.deploy = (ukraine_ip) ->
+    # return fstream.Reader({ 'path': APP_DIR, 'type': 'Directory' })
+    # .pipe(tar.Pack({ 'prefix': '.' }))
+    # .pipe(zlib.Gzip())
+    # .pipe(fstream.Writer({ 'path': 'app.tgz', 'type': 'File' }))
+
     # Read the app's `package.json` file.
     return Q.fcall( ->
         def = Q.defer()
-        fs.readFile 'package.json', 'utf-8', (err, text) ->
+        fs.readFile "#{APP_DIR}/package.json", 'utf-8', (err, text) ->
             if err then def.reject err
             else def.resolve text
         def.promise
@@ -58,8 +66,8 @@ task.deploy = (ukraine_ip) ->
         (pkg) ->
             def = Q.defer()
 
-            fstream({'path': '.'})
-            .pipe(tar.Pack())
+            fstream.Reader({ 'path': APP_DIR, 'type': 'Directory' })
+            .pipe(tar.Pack({ 'prefix': '.' }))
             .pipe(zlib.Gzip())
             .pipe(request.post({'url': "http://#{ukraine_ip}:9002/deploy/username/appname"}, (err, res, body) ->
                 if err then def.reject err
@@ -71,7 +79,7 @@ task.deploy = (ukraine_ip) ->
     # OK or bust.
     ).then(
         (pkg, body) ->
-            winston.info "#{pkg.name.grey} deployed #{'ok'.green.bold}"
+            winston.info (pkg.author + '/' + pkg.name).grey + ' deployed ' + 'ok'.green.bold
         , (err) ->
             winston.error err
     )
