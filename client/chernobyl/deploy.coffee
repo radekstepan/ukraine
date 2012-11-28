@@ -34,15 +34,15 @@ task.deploy = (ukraine_ip) ->
     # JSON parse.
     ).then(
         (pkg) -> JSON.parse pkg
-    # Author field.
+    # User field.
     ).then(
         (pkg) ->
             # Defined?
-            unless pkg.author and pkg.author.length > 0
-                throw 'author'.grey + ' field needs to be defined in ' + 'package.json'.grey 
+            unless pkg.user and pkg.user.length > 0
+                throw 'user'.grey + ' field needs to be defined in ' + 'package.json'.grey 
             # Special chars?
-            if encodeURIComponent(pkg.author) isnt pkg.author
-                throw 'author'.grey + ' field in ' + 'package.json'.grey + ' contains characters that are not allowed in a URL'
+            if encodeURIComponent(pkg.user) isnt pkg.user
+                throw 'user'.grey + ' field in ' + 'package.json'.grey + ' contains characters that are not allowed in a URL'
             pkg
     # App name field.
     ).then(
@@ -69,7 +69,7 @@ task.deploy = (ukraine_ip) ->
             fstream.Reader({ 'path': APP_DIR, 'type': 'Directory' })
             .pipe(tar.Pack({ 'prefix': '.' }))
             .pipe(zlib.Gzip())
-            .pipe(request.post({'url': "http://#{ukraine_ip}:9002/deploy/#{pkg.author}/#{pkg.name}"}, (err, res, body) ->
+            .pipe(request.post({'url': "http://#{ukraine_ip}:9002/deploy/#{pkg.user}/#{pkg.name}"}, (err, res, body) ->
                 if err then def.reject err
                 else if res.statusCode isnt 200 then def.reject body
                 else def.resolve pkg, body
@@ -79,7 +79,7 @@ task.deploy = (ukraine_ip) ->
     # OK or bust.
     ).then(
         (pkg, body) ->
-            winston.info (pkg.author + '/' + pkg.name).grey + ' deployed ' + 'ok'.green.bold
+            winston.info (pkg.user + '/' + pkg.name).grey + ' deployed ' + 'ok'.green.bold
         , (err) ->
             winston.error err
     )

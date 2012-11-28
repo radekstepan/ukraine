@@ -36,8 +36,6 @@ kgb.attach = attach = ->
             # Write it.
             id = fs.openSync path.resolve(__dirname, 'routes.json'), 'w', 0o0666
             fs.writeSync id, JSON.stringify({'router': nu}), null, 'utf8'
-        else
-            console.log body
 
         # Continue as before.
         _sendResponse.apply @, arguments
