@@ -22,16 +22,16 @@ kgb.attach = attach = ->
             unless (do ->
                 found = false
                 for a, b in old.router
-                    [ ip, user, name ] = a.split('/')
+                    [ ip, name ] = a.split('/')
                     # A new port?
-                    if user is body.drone.user and name is body.drone.name
+                    if name is body.drone.name
                         b = "#{ip}/#{body.drone.port}" ; found = true
                     # Save it.
                     nu[a] = b
                 found
             )
                 # Add a new route then.
-                nu["127.0.0.1/#{body.drone.user}/#{body.drone.name}"] = "127.0.0.1:#{body.drone.port}"
+                nu["127.0.0.1/#{body.drone.name}"] = "127.0.0.1:#{body.drone.port}"
 
             # Write it.
             id = fs.openSync path.resolve(__dirname, 'routes.json'), 'w', 0o0666
