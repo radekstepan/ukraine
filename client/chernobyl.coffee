@@ -27,27 +27,21 @@ help = ->
     winston.help '  chernobyl deploy'
     winston.help 'To stop an app in the cloud'.cyan
     winston.help '  chernobyl stop'
+    winston.help 'To list apps in the cloud'.cyan
+    winston.help '  chernobyl list'
     winston.help ''
 
 # Which command?
 if process.argv.length < 3 then help()
 else
-    switch process.argv[2]
-        when 'deploy'
+    switch task = process.argv[2]
+        when 'deploy', 'stop', 'list'
             # Has the user supplied a path to ukraine?
             if process.argv.length isnt 4
                 winston.error "Path to #{'ukraine'.grey} not specified"
                 help()
             else
-                winston.info "Executing the #{'deploy'.magenta} command"
-                (require path.resolve(__dirname, 'chernobyl/deploy.coffee')).deploy process.argv[3]
-        when 'stop'
-            # Has the user supplied a path to ukraine?
-            if process.argv.length isnt 4
-                winston.error "Path to #{'ukraine'.grey} not specified"
-                help()
-            else
-                winston.info "Executing the #{'stop'.magenta} command"
-                (require path.resolve(__dirname, 'chernobyl/stop.coffee')).stop process.argv[3]
+                winston.info "Executing the #{task.magenta} command"
+                (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](process.argv[3])
         else
             help()
