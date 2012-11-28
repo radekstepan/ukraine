@@ -61,6 +61,21 @@ task.deploy = (ukraine_ip) ->
             unless pkg.scripts and pkg.scripts.start and pkg.scripts.start.length > 0
                 throw 'scripts.start'.grey + ' field needs to be defined in ' + 'package.json'.grey 
             pkg
+    # Is anyone listening?
+    ).then(
+        (pkg) ->
+            def = Q.defer()
+
+            request.get {'url': "http://#{ukraine_ip}:9002/version"}, (err, res, body) ->
+                if err
+                    def.reject err
+                else if res.statusCode isnt 200
+                    def.reject body
+                else
+                    winston.info (JSON.parse(body)).version.grey + ' accepting connections'
+                    def.resolve pkg
+
+            def.promise
     # Pack the app directory and stream it to the server.
     ).then(
         (pkg) ->
