@@ -128,18 +128,29 @@ task.deploy = (ukraine_ip, cfg) ->
     # Pack the app directory and stream it to the server.
     ).then(
         (pkg) ->
-            winston.debug 'Sending ' + pkg.name.bold + ' to ' + 'haibu'.grey
-
             def = Q.defer()
 
-            fstream.Reader({ 'path': APP_DIR, 'type': 'Directory' })
-            .pipe(tar.Pack({ 'prefix': '.' }))
-            .pipe(zlib.Gzip())
-            .pipe(request.post({ 'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/deploy/#{APP_USER}/#{pkg.name}" }, (err, res, body) ->
+            # Response handler.
+            response = (err, res, body) ->
                 if err then def.reject err
-                else if res.statusCode isnt 200 then def.reject body
+                else if res.statusCode isnt 200
+                    # Is this the "incorrect header check" error?
+                    if body.error.message is 'incorrect header check'
+                        winston.warn 'Incorrect header check error, trying again'
+                        # Stream again.
+                        stream()
+                    else
+                        def.reject body
                 else def.resolve pkg, body
-            ))
+
+            # Init streaming.
+            stream = do ->
+                winston.debug 'Sending ' + pkg.name.bold + ' to ' + 'haibu'.grey
+                
+                fstream.Reader({ 'path': APP_DIR, 'type': 'Directory' })
+                .pipe(tar.Pack({ 'prefix': '.' }))
+                .pipe(zlib.Gzip())
+                .pipe(request.post({ 'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/deploy/#{APP_USER}/#{pkg.name}" }, response))
 
             def.promise
     # OK or bust.
