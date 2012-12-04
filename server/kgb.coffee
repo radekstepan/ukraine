@@ -43,7 +43,7 @@ kgb.attach = attach = ->
                     found
                 )
                     # Add a new route then.
-                    nu["127.0.0.1/#{body.drone.name}"] = "127.0.0.1:#{body.drone.port}"
+                    nu["127.0.0.1/#{body.drone.name}/"] = "127.0.0.1:#{body.drone.port}"
 
                 # Write it.
                 id = fs.openSync path.resolve(__dirname, 'routes.json'), 'w', 0o0666
