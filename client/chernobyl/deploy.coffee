@@ -20,7 +20,7 @@ APP_USER = 'chernobyl'
 winston.cli()
 
 # The actual task.
-task.deploy = (ukraine_ip) ->
+task.deploy = (ukraine_ip, cfg) ->
     # return fstream.Reader({ 'path': APP_DIR, 'type': 'Directory' })
     # .pipe(tar.Pack({ 'prefix': '.' }))
     # .pipe(zlib.Gzip())
@@ -69,7 +69,7 @@ task.deploy = (ukraine_ip) ->
 
             def = Q.defer()
 
-            request.get {'url': "http://#{ukraine_ip}:9002/version"}, (err, res, body) ->
+            request.get {'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/version"}, (err, res, body) ->
                 if err
                     def.reject err
                 else if res.statusCode isnt 200
@@ -86,7 +86,7 @@ task.deploy = (ukraine_ip) ->
 
             def = Q.defer()
 
-            request.get {'url': "http://#{ukraine_ip}:9002/drones/running"}, (err, res, body) ->
+            request.get {'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/running"}, (err, res, body) ->
                 if err then def.reject err
                 else if res.statusCode isnt 200 then def.reject body
                 else
@@ -113,7 +113,7 @@ task.deploy = (ukraine_ip) ->
                 winston.info 'Trying to stop ' + pkg.name.bold
 
                 request
-                    'uri': "http://#{ukraine_ip}:9002/drones/#{pkg.name}/stop"
+                    'uri': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}/stop"
                     'method': 'POST'
                     'json':
                         'stop':
@@ -135,7 +135,7 @@ task.deploy = (ukraine_ip) ->
             fstream.Reader({ 'path': APP_DIR, 'type': 'Directory' })
             .pipe(tar.Pack({ 'prefix': '.' }))
             .pipe(zlib.Gzip())
-            .pipe(request.post({ 'url': "http://#{ukraine_ip}:9002/deploy/#{APP_USER}/#{pkg.name}" }, (err, res, body) ->
+            .pipe(request.post({ 'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/deploy/#{APP_USER}/#{pkg.name}" }, (err, res, body) ->
                 if err then def.reject err
                 else if res.statusCode isnt 200 then def.reject body
                 else def.resolve pkg, body

@@ -9,8 +9,14 @@ winston.cli()
 haibu = require '../node_modules/haibu/lib/haibu.js' # direct path to local haibu!
 proxy = require 'http-proxy'
 
+# Load config.
+try
+    cfg = JSON.parse fs.readFileSync(path.resolve(__dirname, '../config.json')).toString('utf-8')
+catch e
+    return winston.error e.message
+
 # Create a proxy server listening on port 80 routing to apps in a dynamic `routes` file.
-proxy.createServer('router': path.resolve(__dirname, 'routes.json')).listen(8000)
+proxy.createServer('router': path.resolve(__dirname, 'routes.json')).listen(cfg.proxy_port)
 
 # Inject our own plugin.
 haibu.__defineGetter__ 'kgb', -> require path.resolve(__dirname, 'kgb.coffee')
@@ -29,9 +35,9 @@ winston.help ''
 # Create the hive on port 9002.
 haibu.drone.start
     'env': 'development'
-    'port': 9002
+    'port': cfg.haibu_port
     'host': '127.0.0.1'
 , ->
-    winston.info 'haibu'.grey + ' listening on port ' + '9002'.bold
-    winston.info 'http-proxy'.grey + ' listening on port ' + '8000'.bold
+    winston.info 'haibu'.grey + ' listening on port ' + new String(cfg.haibu_port).bold
+    winston.info 'http-proxy'.grey + ' listening on port ' + new String(cfg.proxy_port).bold
     winston.info 'cloud apps live in ' + path.resolve(__dirname, '../node_modules/haibu/local').bold

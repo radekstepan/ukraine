@@ -31,6 +31,12 @@ help = ->
     winston.help '  chernobyl list'
     winston.help ''
 
+# Do we have config available?
+try
+    cfg = JSON.parse fs.readFileSync(path.resolve(__dirname, '../config.json')).toString('utf-8')
+catch e
+    return winston.error e.message
+
 # Which command?
 if process.argv.length < 3 then help()
 else
@@ -42,6 +48,6 @@ else
                 help()
             else
                 winston.info "Executing the #{task.magenta} command"
-                (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](process.argv[3])
+                (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](process.argv[3], cfg)
         else
             help()

@@ -18,14 +18,14 @@ APP_DIR = '../example_app'
 winston.cli()
 
 # The actual task.
-task.list = (ukraine_ip) ->
+task.list = (ukraine_ip, cfg) ->
     # Is anyone listening?
     return Q.fcall( ->
         winston.debug 'Is ' + 'haibu'.grey + ' up?'
 
         def = Q.defer()
 
-        request.get {'url': "http://#{ukraine_ip}:9002/version"}, (err, res, body) ->
+        request.get {'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/version"}, (err, res, body) ->
             if err
                 def.reject err
             else if res.statusCode isnt 200
@@ -42,7 +42,7 @@ task.list = (ukraine_ip) ->
 
             def = Q.defer()
 
-            request.get {'url': "http://#{ukraine_ip}:9002/drones/running"}, (err, res, body) ->
+            request.get {'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/running"}, (err, res, body) ->
                 if err then def.reject err
                 else if res.statusCode isnt 200 then def.reject body
                 else

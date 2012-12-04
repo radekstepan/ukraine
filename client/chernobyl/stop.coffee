@@ -18,7 +18,7 @@ APP_DIR = '../example_app'
 winston.cli()
 
 # The actual task.
-task.stop = (ukraine_ip) ->
+task.stop = (ukraine_ip, cfg) ->
     # Read the app's `package.json` file.
     return Q.fcall( ->
         winston.debug 'Attempting to read ' + 'package.json'.grey + ' file'
@@ -53,7 +53,7 @@ task.stop = (ukraine_ip) ->
 
             def = Q.defer()
 
-            request.get {'url': "http://#{ukraine_ip}:9002/version"}, (err, res, body) ->
+            request.get {'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/version"}, (err, res, body) ->
                 if err
                     def.reject err
                 else if res.statusCode isnt 200
@@ -71,7 +71,7 @@ task.stop = (ukraine_ip) ->
             winston.info 'Trying to stop ' + pkg.name.bold
 
             request
-                'uri': "http://#{ukraine_ip}:9002/drones/#{pkg.name}/stop"
+                'uri': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}/stop"
                 'method': 'POST'
                 'json':
                     'stop':
@@ -90,7 +90,7 @@ task.stop = (ukraine_ip) ->
 
             def = Q.defer()
 
-            request.get {'url': "http://#{ukraine_ip}:9002/drones/#{pkg.name}"}, (err, res, body) ->
+            request.get {'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}"}, (err, res, body) ->
                 if err then def.reject err
                 else if res.statusCode isnt 404 then def.reject body
                 else def.resolve pkg
