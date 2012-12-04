@@ -10,5 +10,8 @@
     },
     "scripts": {
         "start": "server.js"
+    },
+    "env": {
+        "key": "value"
     }
 }
