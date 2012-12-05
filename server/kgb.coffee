@@ -13,9 +13,9 @@ kgb = exports
 kgb.name = 'kgb'
 kgb.init = (done) -> done()
 
-kgb.attach = attach = ->
+kgb.attach = ->
     # Override default sendResponse.
-    haibu.sendResponse = sendResponse = (res, status, body) ->
+    haibu.sendResponse = (res, status, body) ->
         # Log it.
         winston.debug res.req.url
 

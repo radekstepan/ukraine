@@ -18,11 +18,12 @@ catch e
 # Create a proxy server listening on port 80 routing to apps in a dynamic `routes` file.
 proxy.createServer('router': path.resolve(__dirname, 'routes.json')).listen(cfg.proxy_port)
 
-# Inject our own plugin.
-haibu.__defineGetter__ 'kgb', -> require path.resolve(__dirname, 'kgb.coffee')
+# Inject our own plugins.
+for plugin in [ 'kgb', 'ducktape' ]
+	haibu.__defineGetter__ plugin, -> require path.resolve(__dirname, "#{plugin}.coffee")
 
 # Use these plugins.
-( haibu.use(haibu[plugin], {}) for plugin in [ 'advanced-replies', 'kgb' ] )
+( haibu.use(haibu[plugin], {}) for plugin in [ 'advanced-replies', 'kgb', 'ducktape' ] )
 
 winston.info "Welcome to #{'ukraine'.grey} comrade"
 

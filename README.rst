@@ -8,6 +8,8 @@ ukraine
 Quick start
 -----------
 
+Make sure you have ``node >= 0.8.0`` `installed <https://github.com/joyent/node/blob/master/README.md#to-build>`_, 0.8.15 is recommended as current stable.
+
 Install the package globally:
 
 .. code-block:: bash
@@ -43,7 +45,9 @@ Architecture
 ------------
 
 ukraine
-    spawns a ``node-http-proxy`` server that dynamically watches for changes in a routing table. It also uses a custom loader over ``haibu`` injecting a plugin called ``kgb`` that wiretap listens if a new app has been spawned. If it was, it updates the routing table.
+    Spawns a ``node-http-proxy`` server that dynamically watches for changes in a routing table. It also uses a custom loader over ``haibu`` injecting a plugin called ``kgb`` that wiretap listens if a new app has been spawned. If it was, it updates the routing table.
+    
+    There is also a plugin called ``ductape`` in use that will cleanup any local files before attempting to spawn a new app. Otherwise, we would constantly be spawning an older version of an app.
 
 chernobyl
     #. checks that your app's `package.json` file is in order
