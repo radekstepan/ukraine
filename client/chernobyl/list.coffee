@@ -11,9 +11,6 @@ require 'colors'
 
 task = exports
 
-# Where is the app we are uploading located?
-APP_DIR = '../example_app'
-
 # CLI output on the default output.
 winston.cli()
 

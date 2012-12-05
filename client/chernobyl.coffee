@@ -19,7 +19,7 @@ winston.help ''
 help = ->
     winston.help 'Usage:'.cyan.underline.bold
     winston.help ''
-    winston.help '  chernobyl <action> <ukraine_ip>'
+    winston.help '  chernobyl <action> <ukraine_ip> <app_path>'
     winston.help ''
     winston.help 'Commands:'.cyan.underline.bold
     winston.help ''
@@ -37,17 +37,23 @@ try
 catch e
     return winston.error e.message
 
-# Which command?
 if process.argv.length < 3 then help()
 else
-    switch task = process.argv[2]
-        when 'deploy', 'stop', 'list'
+    # Expand the args.
+    [ _1, _2, task, ukraine_ip, app_path ] = process.argv
+
+    # Default app path.
+    app_path = app_path or '.'
+
+    # Which task?    
+    switch task
+        when 'deploy', 'stop', 'list', 'env'
             # Has the user supplied a path to ukraine?
-            if process.argv.length isnt 4
+            unless ukraine_ip
                 winston.error "Path to #{'ukraine'.grey} not specified"
                 help()
             else
                 winston.info "Executing the #{task.magenta} command"
-                (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](process.argv[3], cfg)
+                (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](ukraine_ip, app_path, cfg)
         else
             help()

@@ -16,6 +16,7 @@ tape.name = 'ducktape'
 tape.init = (done) -> done()
 
 tape.attach = ->
+    # Prefix the default spawner.
     spawner.Spawner::trySpawn = (app, callback) ->
         # Log it.
         winston.warn 'Attempting to cleanup ' + "#{app.user}/#{app.name}".bold + ' if exists'
@@ -26,3 +27,8 @@ tape.attach = ->
 
         # Continue as before.
         _trySpawn.apply @, arguments
+
+    # POST environment variables.
+    haibu.router.post '/env/:userid/:appid', {} , (userId, appId) ->
+        haibu.sendResponse @res, 200,
+            'message': 'env set'

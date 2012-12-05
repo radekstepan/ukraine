@@ -11,8 +11,6 @@ require 'colors'
 
 task = exports
 
-# Where is the app we are uploading located?
-APP_DIR = '.' #'../example_app'
 # Unfortunately, the haibu API only allows to stop apps by name, not by user too.
 APP_USER = 'chernobyl'
 
@@ -20,8 +18,8 @@ APP_USER = 'chernobyl'
 winston.cli()
 
 # The actual task.
-task.deploy = (ukraine_ip, cfg) ->
-    # return fstream.Reader({ 'path': APP_DIR, 'type': 'Directory' })
+task.deploy = (ukraine_ip, app_dir, cfg) ->
+    # return fstream.Reader({ 'path': app_dir, 'type': 'Directory' })
     # .pipe(tar.Pack({ 'prefix': '.' }))
     # .pipe(zlib.Gzip())
     # .pipe(fstream.Writer({ 'path': 'app.tgz', 'type': 'File' }))
@@ -31,7 +29,7 @@ task.deploy = (ukraine_ip, cfg) ->
         winston.debug 'Attempting to read ' + 'package.json'.grey + ' file'
         
         def = Q.defer()
-        fs.readFile "#{APP_DIR}/package.json", 'utf-8', (err, text) ->
+        fs.readFile "#{app_dir}/package.json", 'utf-8', (err, text) ->
             if err then def.reject err
             else def.resolve text
         def.promise
@@ -154,7 +152,7 @@ task.deploy = (ukraine_ip, cfg) ->
             stream = do ->
                 winston.debug 'Sending ' + pkg.name.bold + ' to ' + 'haibu'.grey
                 
-                fstream.Reader({ 'path': APP_DIR, 'type': 'Directory' })
+                fstream.Reader({ 'path': app_dir, 'type': 'Directory' })
                 .pipe(tar.Pack({ 'prefix': '.' }))
                 .pipe(zlib.Gzip())
                 .pipe(request.post({ 'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/deploy/#{APP_USER}/#{pkg.name}" }, response))

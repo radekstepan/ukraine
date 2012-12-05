@@ -11,20 +11,17 @@ require 'colors'
 
 task = exports
 
-# Where is the app we are uploading located?
-APP_DIR = '../example_app'
-
 # CLI output on the default output.
 winston.cli()
 
 # The actual task.
-task.stop = (ukraine_ip, cfg) ->
+task.stop = (ukraine_ip, app_dir, cfg) ->
     # Read the app's `package.json` file.
     return Q.fcall( ->
         winston.debug 'Attempting to read ' + 'package.json'.grey + ' file'
         
         def = Q.defer()
-        fs.readFile "#{APP_DIR}/package.json", 'utf-8', (err, text) ->
+        fs.readFile "#{app_dir}/package.json", 'utf-8', (err, text) ->
             if err then def.reject err
             else def.resolve text
         def.promise
