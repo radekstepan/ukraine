@@ -54,3 +54,15 @@ chernobyl
     #. checks that ``ukraine`` instance is up
     #. checks and stops an existing app if need be
     #. packs the new app and sends it to the cloud to deploy
+
+Troubleshooting
+---------------
+
+Haibu is a poorly written piece of software, be aware of these facts:
+
+#. If you intend to use the API haibu exposes, be sure to send correct parameters in the right format, otherwise you will shut down the app.
+#. Your ``package.json`` start script can only include a file name, not a bash command! Haibu checks that whatever you put in there is an existing file. Even more annoyingly, the file needs to be a js file that node can call.
+#. Sometimes zlib complains when streaming a package, the code here attempts to keep packing and streaming apps to deploy if it gets these errors.
+#. Uploading a new version of the app would not necessarily invalidate the old version, thus we brutforce remove the previous apps.
+#. When an app is deployed, it might still take a second or two for it to actually show over the proxy server.
+#. Although it should be allowed, haibu only allows to kill an app by its name, not name and username so we all deploy apps into a ``chernobyl`` namespace and if you want to deploy the same app again on a different port, you need to change its ``name`` in ``config.json``.

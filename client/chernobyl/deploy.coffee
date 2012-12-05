@@ -12,7 +12,7 @@ require 'colors'
 task = exports
 
 # Where is the app we are uploading located?
-APP_DIR = '.'#'../example_app'
+APP_DIR = '.' #'../example_app'
 # Unfortunately, the haibu API only allows to stop apps by name, not by user too.
 APP_USER = 'chernobyl'
 
@@ -134,12 +134,19 @@ task.deploy = (ukraine_ip, cfg) ->
             response = (err, res, body) ->
                 if err then def.reject err
                 else if res.statusCode isnt 200
-                    # Is this the "incorrect header check" error?
-                    if body.error.message is 'incorrect header check'
-                        winston.warn 'Incorrect header check error, trying again'
-                        # Stream again.
-                        stream()
-                    else
+                    # Try JSON.
+                    try
+                        body = JSON.parse body
+                        # Does it have a standard signature?
+                        message = body?.error?.message or body
+                        # Is this the "incorrect header check" error?
+                        if message is 'incorrect header check'
+                            winston.warn 'Incorrect header check error, trying again'
+                            # Stream again.
+                            stream()
+                        else
+                            def.reject JSON.stringify body
+                    catch e
                         def.reject body
                 else def.resolve pkg, body
 
