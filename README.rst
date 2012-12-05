@@ -1,7 +1,7 @@
 ukraine
 =========
 
-``ukraine`` glues ``haibu`` and ``node-http-proxy`` adding a little helper, ``chernobyl``, that deploys into this cloud. It is probably as stable as you think it is.
+``ukraine`` glues ``haibu`` and ``node-http-proxy`` adding two little helpers, ``chernobyl`` and  ``ducktape``, that deploys into this cloud. It is probably as stable as you think it is.
 
 .. image:: https://raw.github.com/radekstepan/ukraine/master/example.png
 
@@ -47,7 +47,7 @@ Architecture
 ukraine
     Spawns a ``node-http-proxy`` server that dynamically watches for changes in a routing table. It also uses a custom loader over ``haibu`` injecting a plugin called ``kgb`` that wiretap listens if a new app has been spawned. If it was, it updates the routing table.
     
-    There is also a plugin called ``ductape`` in use that will cleanup any local files before attempting to spawn a new app. Otherwise, we would constantly be spawning an older version of an app.
+    There is also a plugin called ``ducktape`` in use that will cleanup any local files before attempting to spawn a new app. Otherwise, we would constantly be spawning an older version of an app.
 
 chernobyl
     #. checks that your app's `package.json` file is in order
