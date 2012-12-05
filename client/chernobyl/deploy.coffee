@@ -12,7 +12,7 @@ require 'colors'
 task = exports
 
 # Where is the app we are uploading located?
-APP_DIR = '../example_app'
+APP_DIR = '.'#'../example_app'
 # Unfortunately, the haibu API only allows to stop apps by name, not by user too.
 APP_USER = 'chernobyl'
 
