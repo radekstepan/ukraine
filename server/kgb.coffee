@@ -6,6 +6,9 @@ winston = require 'winston'
 # CLI output on the default output.
 winston.cli()
 
+# We request the same file in the main thread.
+cfg = JSON.parse fs.readFileSync(path.resolve(__dirname, '../config.json')).toString('utf-8')
+
 haibu = require '../node_modules/haibu/lib/haibu.js' # direct path to local haibu!
 _sendResponse = haibu.sendResponse
 
@@ -42,8 +45,8 @@ kgb.attach = ->
                         nu[a] = b
                     found
                 )
-                    # Add a new route then.
-                    nu["127.0.0.1/#{body.drone.name}/"] = "127.0.0.1:#{body.drone.port}"
+                    # Add a new route then mapping from the outside in.
+                    nu["#{cfg.proxy_host}/#{body.drone.name}/"] = "127.0.0.1:#{body.drone.port}"
 
                 # Write it.
                 id = fs.openSync path.resolve(__dirname, 'routes.json'), 'w', 0o0666

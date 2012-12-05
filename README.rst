@@ -37,7 +37,7 @@ Move to a directory with the app to deploy. Deploy pointing to cloud instance:
 Config
 -----------
 
-To set the ports the proxy and haibu are supposed to be listening on, edit the ``config.json`` file.
+To set the ports the proxy and haibu are supposed to be listening on, edit the ``config.json`` file. Edit the ``proxy_host`` property there if you are calling your server another name.
 
 For setting environment variables exposed through ``process.env``, set the key value pair ``env`` in your app's ``config.json`` file.
 
