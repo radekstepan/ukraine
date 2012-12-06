@@ -7,14 +7,26 @@ Q       = require 'q'
 # CLI output on the default output.
 winston.cli()
 
+winston.info "Welcome to #{'ukraine'.grey} comrade"
+
+# Show welcome logo and desc.
+( winston.help line.cyan.bold for line in fs.readFileSync(path.resolve(__dirname, 'logo.txt')).toString('utf-8').split('\n') )
+winston.help ''
+winston.help 'Management of Node.js cloud apps'
+winston.help ''
+
 haibu = require '../node_modules/haibu/lib/haibu.js' # direct path to local haibu!
 proxy = require 'http-proxy'
+
+winston.debug 'Trying to load config'
 
 # Load config.
 try
     cfg = JSON.parse fs.readFileSync(path.resolve(__dirname, '../config.json')).toString('utf-8')
 catch e
     return winston.error e.message
+
+winston.debug 'Trying to spawn proxy server'
 
 # Create a proxy server listening on port 80 routing to apps in a dynamic `routes` file.
 proxy.createServer('router': path.resolve(__dirname, 'routes.json')).listen(cfg.proxy_port)
@@ -23,16 +35,12 @@ proxy.createServer('router': path.resolve(__dirname, 'routes.json')).listen(cfg.
 for plugin in [ 'kgb', 'ducktape' ]
     haibu.__defineGetter__ plugin, -> require path.resolve(__dirname, "#{plugin}.coffee")
 
+winston.debug 'Trying to use custom haibu plugins'
+
 # Use these plugins.
 ( haibu.use(haibu[plugin], {}) for plugin in [ 'advanced-replies', 'kgb', 'ducktape' ] )
 
-winston.info "Welcome to #{'ukraine'.grey} comrade"
-
-# Show welcome logo and desc.
-( winston.help line.cyan.bold for line in fs.readFileSync(path.resolve(__dirname, 'logo.txt')).toString('utf-8').split('\n') )
-winston.help ''
-winston.help 'Management of Node.js cloud apps'
-winston.help ''
+winston.debug 'Trying to start haibu drone'
 
 # Create the hive on port 9002.
 haibu.drone.start
@@ -45,6 +53,7 @@ haibu.drone.start
     winston.info 'cloud apps live in ' + path.resolve(__dirname, '../node_modules/haibu/local').bold
 
     # Following will be monkey patching the router with our own functionality.
+    winston.debug 'Monkey patching custom haibu routes'
 
     # POST environment variables.
     haibu.router.post '/env/:userid/:appid', {} , (user_id, app_id) ->
