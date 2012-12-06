@@ -29,6 +29,8 @@ help = ->
     winston.help '  chernobyl stop'
     winston.help 'To list apps in the cloud'.cyan
     winston.help '  chernobyl list'
+    winston.help 'To send an environment variable'.cyan
+    winston.help '  chernobyl env ... <key>="<value>"'
     winston.help ''
 
 # Do we have config available?
@@ -40,7 +42,7 @@ catch e
 if process.argv.length < 3 then help()
 else
     # Expand the args.
-    [ _1, _2, task, ukraine_ip, app_path ] = process.argv
+    [ _1, _2, task, ukraine_ip, app_path, _3 ] = process.argv
 
     # Default app path.
     app_path = app_path or '.'
@@ -53,7 +55,15 @@ else
                 winston.error "Path to #{'ukraine'.grey} not specified"
                 help()
             else
-                winston.info "Executing the #{task.magenta} command"
-                (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](ukraine_ip, app_path, cfg)
+                if task is 'env'
+                    unless _3
+                        winston.error "No key=value pair specified"
+                        help()
+                    else
+                        winston.info "Executing the #{task.magenta} command"
+                        (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](ukraine_ip, app_path, _3, cfg)
+                else
+                    winston.info "Executing the #{task.magenta} command"
+                    (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](ukraine_ip, app_path, cfg)
         else
             help()

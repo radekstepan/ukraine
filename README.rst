@@ -39,7 +39,7 @@ Config
 
 To set the ports the proxy and haibu are supposed to be listening on, edit the ``config.json`` file. Edit the ``proxy_host`` property there if you are calling your server another name.
 
-For setting environment variables exposed through ``process.env``, set the key value pair ``env`` in your app's ``config.json`` file.
+For setting environment variables exposed through ``process.env``, set the key value pair ``env`` in your app's ``package.json`` file. You can also use the ``chernobyl`` app itself to pass them if you do not want to expose them in a public ``package.json`` file.
 
 Architecture
 ------------
@@ -48,6 +48,8 @@ ukraine
     Spawns a ``node-http-proxy`` server that dynamically watches for changes in a routing table. It also uses a custom loader over ``haibu`` injecting a plugin called ``kgb`` that wiretap listens if a new app has been spawned. If it was, it updates the routing table.
     
     There is also a plugin called ``ducktape`` in use that will cleanup any local files before attempting to spawn a new app. Otherwise, we would constantly be spawning an older version of an app.
+
+    For posting env variables, we add a new router method that maintains a list of apps to env vars passed by the user. Whenever a new app is to be spawned, these vars are injected into its ``package.json`` file.
 
 chernobyl
     #. checks that your app's `package.json` file is in order
