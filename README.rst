@@ -25,6 +25,8 @@ Start it up:
 
     $ sudo ukraine
 
+.. note:: You might have to background the task and ``disown`` it before logging off the machine.
+
 As a client
 ~~~~~~~~~~~
 
