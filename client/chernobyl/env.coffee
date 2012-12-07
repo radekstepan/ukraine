@@ -98,24 +98,17 @@ task.env = (ukraine_ip, app_dir, key_value, cfg) ->
                     def.resolve pkg
 
             def.promise
-    # Attempt to restart the app.
+    # Check that the app is running again.
     ).then(
         (pkg) ->
+            winston.debug 'Is ' + pkg.name.bold + ' running again?'
+
             def = Q.defer()
 
-            winston.info 'Trying to restart ' + pkg.name.bold
-
-            request
-                'uri': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}/restart"
-                'method': 'POST'
-                'json':
-                    'restart':
-                        'name': pkg.name
-            , (err, res, body) ->
+            request.get {'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}"}, (err, res, body) ->
                 if err then def.reject err
-                else if res.statusCode isnt 200 then def.reject body?.error?.message or body
-                else
-                    def.resolve pkg
+                else if res.statusCode isnt 200 then def.reject body
+                else def.resolve pkg
 
             def.promise
     # OK or bust.

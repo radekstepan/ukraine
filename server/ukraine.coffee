@@ -48,14 +48,10 @@ haibu.drone.start
     'port': cfg.haibu_port
     'host': '127.0.0.1'
 , ->
-    winston.info 'haibu'.grey + ' listening on port ' + new String(cfg.haibu_port).bold
-    winston.info 'http-proxy'.grey + ' listening on port ' + new String(cfg.proxy_port).bold
-    winston.info 'cloud apps live in ' + path.resolve(__dirname, '../node_modules/haibu/local').bold
-
     # Following will be monkey patching the router with our own functionality.
     winston.debug 'Monkey patching custom haibu routes'
 
-    # POST environment variables.
+    # POST environment variables and restart the app with this new information.
     haibu.router.post '/env/:userid/:appid', {} , (user_id, app_id) ->
         req = @req ; res = @res
         
@@ -80,7 +76,18 @@ haibu.drone.start
                 # Write it.
                 id = fs.openSync p, 'w', 0o0666
                 fs.writeSync id, JSON.stringify(env), null, 'utf8'
-        
+        # Stop the app.
+        ).when(
+            ->
+        # Clean it up.
+        ).when(
+            ->
+        # Deploy it anew.
+        ).when(
+            ->
+        # Update the route to the app with the new port.
+        ).when(
+            ->
         # OK or bust.
         ).done(
             ->
@@ -90,3 +97,8 @@ haibu.drone.start
                     'error':
                         'message': err.message
         )
+
+    # We done.
+    winston.info 'haibu'.grey + ' listening on port ' + new String(cfg.haibu_port).bold
+    winston.info 'http-proxy'.grey + ' listening on port ' + new String(cfg.proxy_port).bold
+    winston.info 'cloud apps live in ' + path.resolve(__dirname, '../node_modules/haibu/local').bold
