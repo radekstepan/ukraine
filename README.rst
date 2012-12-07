@@ -25,7 +25,13 @@ Start it up:
 
     $ sudo ukraine
 
-.. note:: You might have to background the task and ``disown`` it before logging off the machine.
+.. note::
+    In order to run the server in the background, I recommend you install `forever.js <https://github.com/nodejitsu/forever>`_ and start the service as follows:
+
+    .. code-block:: bash
+
+        $ sudo npm install forever -g
+        $ sudo forever start /usr/local/lib/node_modules/ukraine/bin/ukraine
 
 As a client
 ~~~~~~~~~~~
@@ -51,7 +57,7 @@ ukraine
     
     There is also a plugin called ``ducktape`` in use that will cleanup any local files before attempting to spawn a new app. Otherwise, we would constantly be spawning an older version of an app.
 
-    For posting env variables, we add a new router method that maintains a list of apps to env vars passed by the user. Whenever a new app is to be spawned, these vars are injected into its ``package.json`` file.
+    For posting env variables, we add a new router method that maintains a list of apps to env vars passed by the user. We save the new environment and then custom restart the app for the changes to take effect.
 
 chernobyl
     #. checks that your app's `package.json` file is in order
@@ -70,3 +76,4 @@ Haibu is a poorly written piece of software, be aware of these facts:
 #. Uploading a new version of the app would not necessarily invalidate the old version, thus we brutforce remove the previous apps.
 #. When an app is deployed, it might still take a second or two for it to actually show over the proxy server.
 #. Although it should be allowed, haibu only allows to kill an app by its name, not name and username so we all deploy apps into a ``chernobyl`` namespace and if you want to deploy the same app again on a different port, you need to change its ``name`` in ``config.json``.
+#. Restarting the app does not work as one would expect getting the latest env variables, stopping does not either expecting an ``application`` object instead of the ``name`` it is passed from the service. When setting new environment variable, then, we take a custom approach of stopping a running instance, getting the latest hash of its package and starting it again with these settings.
