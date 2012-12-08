@@ -75,7 +75,7 @@ haibu.router.post '/drones/:name/deploy', { 'stream': true } , (APP_NAME) ->
 
             # Write it.
             id = fs.openSync routes, 'w', 0o0666
-            fs.writeSync id, JSON.stringify({'router': nu}), null, 'utf8'
+            fs.writeSync id, JSON.stringify({'router': nu}, null, 4), null, 'utf8'
     # OK or bust.
     ).done(
         ->

@@ -21,7 +21,7 @@ proxy = require 'http-proxy'
 winston.debug 'Creating new routing and nev table?'
 
 # Do we need to init routing and env tables?
-unless fs.existsSync(p = path.resolve(__dirname, "./routes.json")) then fs.writeFileSync p, '{"router":{}}'
+unless fs.existsSync(p = path.resolve(__dirname, "./routes.json")) then fs.writeFileSync p, JSON.stringify {"router":{}}, null, 4
 unless fs.existsSync(p = path.resolve(__dirname, "./env.json")) then fs.writeFileSync p, '{}'
 
 winston.debug 'Trying to load config'
@@ -70,7 +70,7 @@ haibu.drone.start
 
     # Write the routing table.
     id = fs.openSync path.resolve(__dirname, 'routes.json'), 'w', 0o0666
-    fs.writeSync id, JSON.stringify({'router': table}), null, 'utf8'
+    fs.writeSync id, JSON.stringify({'router': table}, null, 4), null, 'utf8'
 
     # We done.
     winston.info 'haibu'.grey + ' listening on port ' + new String(cfg.haibu_port).bold

@@ -40,7 +40,7 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
 
             # Write it.
             id = fs.openSync p, 'w', 0o0666
-            fs.writeSync id, JSON.stringify(env), null, 'utf8'
+            fs.writeSync id, JSON.stringify(env, null, 4), null, 'utf8'
     # Get the hash and package dir of the running app.
     ).then(
         ->
