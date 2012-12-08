@@ -7,7 +7,6 @@ zlib    = require 'zlib'
 fstream = require 'fstream'
 request = require 'request'
 Q       = require 'q'
-require 'colors'
 
 task = exports
 
@@ -67,7 +66,11 @@ task.deploy = (ukraine_ip, app_dir, cfg) ->
 
             def = Q.defer()
 
-            request.get {'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/version"}, (err, res, body) ->
+            request.get
+                'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/version"
+                'headers':
+                    'x-auth-token': cfg.auth_token
+            , (err, res, body) ->
                 if err
                     def.reject err
                 else if res.statusCode isnt 200
@@ -115,6 +118,8 @@ task.deploy = (ukraine_ip, app_dir, cfg) ->
                 .pipe(
                     request.post
                         'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}/deploy"
+                        'headers':
+                            'x-auth-token': cfg.auth_token
                     , response
                 )
 
@@ -124,5 +129,8 @@ task.deploy = (ukraine_ip, app_dir, cfg) ->
         (pkg, body) ->
             winston.info pkg.name.bold + ' deployed ' + 'ok'.green.bold
         , (err) ->
-            winston.error err
+            try
+                winston.error (JSON.parse(err)).message
+            catch e
+                winston.error err
     )

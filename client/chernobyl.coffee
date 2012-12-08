@@ -17,18 +17,16 @@ winston.help ''
 
 # Show help.
 help = ->
-    winston.help 'Usage:'.cyan.underline.bold
-    winston.help ''
-    winston.help '  chernobyl <action> <ukraine_ip> <app_path>'
-    winston.help ''
     winston.help 'Commands:'.cyan.underline.bold
     winston.help ''
     winston.help 'To deploy an app into cloud'.cyan
-    winston.help '  chernobyl deploy'
+    winston.help '  chernobyl deploy <ukraine_ip> <app_path>'
     winston.help 'To stop an app in the cloud'.cyan
-    winston.help '  chernobyl stop'
+    winston.help '  chernobyl stop <ukraine_ip> <app_path>'
     winston.help 'To send an environment variable'.cyan
-    winston.help '  chernobyl env ... <key>="<value>"'
+    winston.help '  chernobyl env <ukraine_ip> <app_path> <key>="<value>"'
+    winston.help 'To authenticate this account'.cyan
+    winston.help '  chernobyl auth <ukraine_ip> <auth_key>'
     winston.help ''
 
 # Do we have config available?
@@ -37,31 +35,34 @@ try
 catch e
     return winston.error e.message
 
+# Boost config with auth token if available.
+if fs.existsSync(t = process.env.HOME + '/.chernobyl') then cfg.auth_token = fs.readFileSync t
+
 if process.argv.length < 3 then help()
 else
     # Expand the args.
-    [ _1, _2, task, ukraine_ip, app_path, _3 ] = process.argv
+    [ α, β, task, ukraine_ip, ε, ζ ] = process.argv
 
-    # Default app path.
+    # Default app path is "this" folder.
     app_path = app_path or '.'
 
     # Which task?    
     switch task
-        when 'deploy', 'stop', 'env'
+        when 'deploy', 'stop', 'env', 'auth'
             # Has the user supplied a path to ukraine?
             unless ukraine_ip
                 winston.error "Path to #{'ukraine'.grey} not specified"
                 help()
             else
                 if task is 'env'
-                    unless _3
-                        winston.error "No key=value pair specified"
-                        help()
-                    else
-                        winston.info "Executing the #{task.magenta} command"
-                        (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](ukraine_ip, app_path, _3, cfg)
+                        unless ζ
+                            winston.error "No key=value pair specified"
+                            help()
+                        else
+                            winston.info "Executing the #{task.magenta} command"
+                            (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](ukraine_ip, ε, ζ, cfg)
                 else
                     winston.info "Executing the #{task.magenta} command"
-                    (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](ukraine_ip, app_path, cfg)
+                    (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](ukraine_ip, ε, cfg)
         else
             help()

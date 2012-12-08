@@ -49,6 +49,8 @@ To set the ports the proxy and haibu are supposed to be listening on, edit the `
 
 For setting environment variables exposed through ``process.env``, set the key value pair ``env`` in your app's ``package.json`` file. You can also use the ``chernobyl`` app itself to pass them if you do not want to expose them in a public ``package.json`` file.
 
+Removing the ``auth_token`` key value pair from the config file will make the service exposed to anyone. You may want to change the value...
+
 Architecture
 ------------
 
@@ -57,9 +59,12 @@ ukraine
     
     New method for posting env vars has been added.
 
+    Token authentication has been added too.
+
 chernobyl
     #. checks that your app's `package.json` file is in order
     #. checks that ``ukraine`` instance is up
+    #. check if we need to auth to deploy an app
     #. checks and stops an existing app if need be
     #. packs the new app and sends it to the cloud to deploy
 

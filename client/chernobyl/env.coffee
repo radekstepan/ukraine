@@ -1,13 +1,8 @@
 #!/usr/bin/env coffee
 fs      = require 'fs'
-path    = require 'path'
 winston = require 'winston'
-tar     = require 'tar'
-zlib    = require 'zlib'
-fstream = require 'fstream'
 request = require 'request'
 Q       = require 'q'
-require 'colors'
 
 task = exports
 
@@ -67,7 +62,11 @@ task.env = (ukraine_ip, app_dir, key_value, cfg) ->
 
             def = Q.defer()
 
-            request.get {'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/version"}, (err, res, body) ->
+            request.get
+                'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/version"
+                'headers':
+                    'x-auth-token': cfg.auth_token
+            , (err, res, body) ->
                 if err
                     def.reject err
                 else if res.statusCode isnt 200
@@ -87,6 +86,8 @@ task.env = (ukraine_ip, app_dir, key_value, cfg) ->
             request
                 'uri': "http://#{ukraine_ip}:#{cfg.haibu_port}/env/#{pkg.name}"
                 'method': 'POST'
+                'headers':
+                    'x-auth-token': cfg.auth_token
                 # The data to send.
                 'json':
                     'key': key
@@ -105,7 +106,11 @@ task.env = (ukraine_ip, app_dir, key_value, cfg) ->
 
             def = Q.defer()
 
-            request.get {'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}"}, (err, res, body) ->
+            request.get
+                'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}"
+                'headers':
+                    'x-auth-token': cfg.auth_token
+            , (err, res, body) ->
                 if err then def.reject err
                 else if res.statusCode isnt 200 then def.reject body
                 else def.resolve pkg
@@ -116,5 +121,8 @@ task.env = (ukraine_ip, app_dir, key_value, cfg) ->
         (pkg, body) ->
             winston.info 'Environment variable ' + key.bold  + ' for ' + pkg.name.bold + ' set ' + 'ok'.green.bold
         , (err) ->
-            winston.error err
+            try
+                winston.error (JSON.parse(err)).message
+            catch e
+                winston.error err
     )
