@@ -35,9 +35,6 @@ try
 catch e
     return winston.error e.message
 
-# Boost config with auth token if available.
-if fs.existsSync(t = process.env.HOME + '/.chernobyl') then cfg.auth_token = fs.readFileSync t
-
 if process.argv.length < 3 then help()
 else
     # Expand the args.
@@ -54,6 +51,15 @@ else
                 winston.error "Path to #{'ukraine'.grey} not specified"
                 help()
             else
+                # Boost config with auth token if available.
+                if fs.existsSync(t = process.env.HOME + '/.chernobyl')
+                    try
+                        tokens = JSON.parse fs.readFileSync t
+                        if tokens[ukraine_ip] then cfg.auth_token = tokens[ukraine_ip]
+                    catch e
+                        # Silence!
+
+                # env
                 if task is 'env'
                         unless ζ
                             winston.error "No key=value pair specified"
@@ -61,6 +67,7 @@ else
                         else
                             winston.info "Executing the #{task.magenta} command"
                             (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](ukraine_ip, ε, ζ, cfg)
+                # deploy, stop, auth
                 else
                     winston.info "Executing the #{task.magenta} command"
                     (require path.resolve(__dirname, "chernobyl/#{task}.coffee"))[task](ukraine_ip, ε, cfg)

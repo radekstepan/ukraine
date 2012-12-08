@@ -59,7 +59,7 @@ ukraine
     
     New method for posting env vars has been added.
 
-    Token authentication has been added too.
+    Token authentication per ukraine instance has been added too.
 
 chernobyl
     #. checks that your app's `package.json` file is in order

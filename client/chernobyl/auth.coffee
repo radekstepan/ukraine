@@ -16,7 +16,16 @@ winston.cli()
 task.auth = (ukraine_ip, auth_token, cfg) ->
     return Q.fcall( ->
         winston.debug 'Attempting to write into ' + '.chernobyl'.grey + ' file'
-        fs.writeFileSync TOKEN_PATH, auth_token
+
+        # Does the file exist already?
+        tokens = {}
+        if fs.existsSync TOKEN_PATH then tokens = JSON.parse fs.readFileSync TOKEN_PATH
+
+        # Add our token/override.
+        tokens[ukraine_ip] = auth_token
+
+        # Write it, nicely.
+        fs.writeFileSync TOKEN_PATH, JSON.stringify tokens, null, 4
     # Try to auth with ukraine.
     ).when(
         ->
