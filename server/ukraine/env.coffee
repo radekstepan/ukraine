@@ -18,15 +18,19 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
     req = @req ; res = @res
     
     # Good headers?
-    return Q.fcall( ->            
+    return Q.fcall( ->
+        winston.debug 'Checking for JSON content-type'
         throw 'Incorrect content-type, send JSON' unless req.request.headers['content-type'] is 'application/json'
     # Correct format?
-    ).when(
+    ).then(
         ->
+            winston.debug 'Checking request format'
             throw 'Incorrect {key: "", value: ""} format' unless req.body.key and req.body.value
     # Set in a file.
     ).when(
         ->
+            winston.debug 'Setting property in local env file.'
+
             # Get the file.
             env = JSON.parse fs.readFileSync p = path.resolve(__dirname, '../env.json')
             
@@ -40,13 +44,17 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
             fs.writeSync id, JSON.stringify(env), null, 'utf8'
     # Get the hash and package dir of the running app.
     ).then(
-        ->            
+        ->
+            winston.debug 'Getting apps\'s package dir and hash'
+
             for app in haibu.running.drone.running()
                 if app.user is APP_USER and app.name is APP_NAME
                     return [ app.hash, haibu.running.drone.show(APP_NAME).app.directories.home ]
     # Stop the app.
     ).when(
         ([ hash, dir ]) ->
+            winston.debug 'Stopping app'
+
             def = Q.defer()
 
             haibu.running.drone.stop APP_NAME, (err, result) ->
@@ -57,6 +65,8 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
     # Get the app's `package.json` file and form an app object.
     ).then(
         ([ hash, dir ]) ->
+            winston.debug 'Forming new app object'
+
             # Resolve path.
             dir = path.resolve __dirname, '../../node_modules/haibu/packages/' + dir
 
@@ -72,6 +82,8 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
     # Deploy it anew.
     ).when(
         (pkg) ->
+            winston.debug 'Starting app anew'
+
             def = Q.defer()
 
             haibu.running.drone.start pkg, (err, result) ->
@@ -82,6 +94,8 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
     # Get the new app's port.
     ).then(
         ->
+            winston.debug 'Getting deployed app\'s new port'
+
             # Find the new port in the running apps.
             for app in haibu.running.drone.running()
                 if app.user is APP_USER and app.name is APP_NAME
@@ -89,6 +103,8 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
     # Update the route to the app with the new port.
     ).when(
         (port) ->
+            winston.debug 'Updating proxy routes'
+
             # Get the current routes.
             old = JSON.parse fs.readFileSync p = path.resolve(__dirname, '../routes.json')
             # Store the new routes here.
