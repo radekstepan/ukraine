@@ -55,6 +55,17 @@ haibu.drone.start
     for file in wrench.readdirSyncRecursive path.resolve __dirname, './ukraine/'
         require './ukraine/' + file
 
+    # See which apps have been re-spawned from a previous session and update our routes.
+    winston.debug 'Updating proxy routing table'
+    
+    # Traverse running apps.
+    table = {}
+    ( table["#{cfg.proxy_host}/#{app.name}/"] = "127.0.0.1:#{app.port}" for app in haibu.running.drone.running() )
+
+    # Write the routing table.
+    id = fs.openSync path.resolve(__dirname, 'routes.json'), 'w', 0o0666
+    fs.writeSync id, JSON.stringify({'router': table}), null, 'utf8'
+
     # We done.
     winston.info 'haibu'.grey + ' listening on port ' + new String(cfg.haibu_port).bold
     winston.info 'http-proxy'.grey + ' listening on port ' + new String(cfg.proxy_port).bold
