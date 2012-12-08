@@ -152,10 +152,17 @@ task.deploy = (ukraine_ip, app_dir, cfg) ->
             stream = do ->
                 winston.debug 'Sending ' + pkg.name.bold + ' to ' + 'haibu'.grey
                 
-                fstream.Reader({ 'path': app_dir, 'type': 'Directory' })
+                # Skip fils in `node_modules` directory.
+                filter = (props) -> props.path.indexOf('/node_modules/') is -1
+
+                fstream.Reader({ 'path': app_dir, 'type': 'Directory', 'filter': filter })
                 .pipe(tar.Pack({ 'prefix': '.' }))
                 .pipe(zlib.Gzip())
-                .pipe(request.post({ 'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/deploy/#{APP_USER}/#{pkg.name}" }, response))
+                .pipe(
+                    request.post
+                        'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/deploy/#{APP_USER}/#{pkg.name}"
+                    , response
+                )
 
             def.promise
     # OK or bust.
