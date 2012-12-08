@@ -2,6 +2,7 @@
 fs      = require 'fs'
 path    = require 'path'
 winston = require 'winston'
+wrench  = require 'wrench'
 
 # CLI output on the default output.
 winston.cli()
@@ -50,7 +51,8 @@ haibu.drone.start
     # Following will be monkey patching the router with our own functionality.
     winston.debug 'Adding custom routes'
 
-    require './ukraine/env.coffee'
+    for file in wrench.readdirSyncRecursive path.resolve __dirname, './ukraine/'
+        require './ukraine/' + file
 
     # We done.
     winston.info 'haibu'.grey + ' listening on port ' + new String(cfg.haibu_port).bold

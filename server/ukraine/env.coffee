@@ -38,45 +38,32 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
             # Write it.
             id = fs.openSync p, 'w', 0o0666
             fs.writeSync id, JSON.stringify(env), null, 'utf8'
-    # Get the hash of the running app.
+    # Get the hash and package dir of the running app.
     ).then(
-        ->
+        ->            
             for app in haibu.running.drone.running()
                 if app.user is APP_USER and app.name is APP_NAME
-                    return app.hash
+                    return [ app.hash, haibu.running.drone.show(APP_NAME).app.directories.home ]
     # Stop the app.
     ).when(
-        (hash) ->
+        ([ hash, dir ]) ->
             def = Q.defer()
 
             haibu.running.drone.stop APP_NAME, (err, result) ->
                 if err then def.reject err
-                else def.resolve hash
+                else def.resolve [ hash, dir ]
 
             def.promise
-    # Get the app's latest package path.
-    ).then(
-        (hash) ->
-            # Path to packages.
-            p = path.resolve __dirname, '../../node_modules/haibu/packages/'
-
-            i = 0
-            # Read the packages.
-            for a in wrench.readdirSyncRecursive(p)
-                # Just top level dirs please.
-                if a.split('/').length is 1
-                    # Now split on our name and get the number of ms.
-                    [ b, time ] = a.split "#{APP_USER}-#{APP_NAME}"
-                    if time.length is 14
-                        # Save the highest amount.
-                        if (ms = parseInt(time[1...])) > i then i = ms
-
-            [ "#{p}/#{APP_USER}-#{APP_NAME}-#{i}", hash ]
     # Get the app's `package.json` file and form an app object.
     ).then(
-        ([ dir, hash ]) ->
+        ([ hash, dir ]) ->
+            # Resolve path.
+            dir = path.resolve __dirname, '../../node_modules/haibu/packages/' + dir
+
+            # Read `package.json`.
             pkg = JSON.parse fs.readFileSync(dir + '/package.json')
 
+            # Merge in properties.
             pkg.user = APP_USER
             pkg.hash = hash
             pkg.repository = 'type': 'local', 'directory': dir
