@@ -31,14 +31,12 @@ winston.debug 'Trying to spawn proxy server'
 # Create a proxy server listening on port 80 routing to apps in a dynamic `routes` file.
 proxy.createServer('router': path.resolve(__dirname, 'routes.json')).listen(cfg.proxy_port)
 
+winston.debug 'Trying to use custom haibu plugins'
+
 # Inject our own plugins.
 for plugin in [ 'ducktape' ]
     haibu.__defineGetter__ plugin, -> require path.resolve(__dirname, "#{plugin}.coffee")
-
-winston.debug 'Trying to use custom haibu plugins'
-
-# Use these plugins.
-( haibu.use(haibu[plugin], {}) for plugin in [ 'ducktape' ] )
+    haibu.use(haibu[plugin], {})
 
 winston.debug 'Trying to start haibu drone'
 

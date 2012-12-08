@@ -77,41 +77,6 @@ task.deploy = (ukraine_ip, app_dir, cfg) ->
                     def.resolve pkg
 
             def.promise
-    # Is this app running already?
-    ).then(
-        (pkg) ->
-            winston.debug 'Is ' + pkg.name.bold + ' running already?'
-
-            def = Q.defer()
-
-            request.get {'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}"}, (err, res, body) ->
-                if err then def.reject err
-                else if res.statusCode isnt 200 then def.resolve [ false, pkg ]
-                else
-                    winston.warn pkg.name.bold + ' exists already'
-                    def.resolve [ true, pkg ]
-
-            def.promise
-    # If we are passed an id of an app to stop, we will attempt to stop it.
-    ).then(
-        ([ stop, pkg ]) ->
-            def = Q.defer()
-
-            # Do we need to actually try the stopping?
-            unless stop then def.resolve pkg
-            else
-                winston.info 'Trying to stop ' + pkg.name.bold
-
-                request
-                    'uri': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}/stop"
-                    'method': 'POST'
-                , (err, res, body) ->
-                    if err then def.reject err
-                    else if res.statusCode isnt 200 then def.reject body
-                    else
-                        def.resolve pkg
-
-            def.promise
     # Pack the app directory and stream it to the server.
     ).then(
         (pkg) ->
