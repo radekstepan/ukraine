@@ -57,25 +57,24 @@ haibu.router.post '/drones/:name/deploy', { 'stream': true } , (APP_NAME) ->
             # Get the current routes.
             old = JSON.parse fs.readFileSync routes
             # Store the new routes here.
-            nu = {}
+            rtr = {}
             # Update to a new port?
             unless (do ->
                 found = false
-                for a, b in old.router
-                    [ ip, name ] = a.split('/')
+                for external, internal of old.router
                     # A new port?
-                    if name is APP_NAME
-                        b = "#{ip}/#{port}" ; found = true
-                    # Save it.
-                    nu[a] = b
+                    if external.split('/')[1] is APP_NAME
+                        internal = "127.0.0.1:#{port}" ; found = true
+                    # Save it back.
+                    rtr[external] = internal
                 found
             )
                 # Add a new route then mapping from the outside in.
-                nu["#{CFG.proxy_host}/#{APP_NAME}/"] = "127.0.0.1:#{port}"
+                rtr["#{CFG.proxy_host}/#{APP_NAME}/"] = "127.0.0.1:#{port}"
 
             # Write it.
             id = fs.openSync routes, 'w', 0o0666
-            fs.writeSync id, JSON.stringify({'router': nu}, null, 4), null, 'utf8'
+            fs.writeSync id, JSON.stringify({'router': rtr}, null, 4), null, 'utf8'
     # OK or bust.
     ).done(
         ->

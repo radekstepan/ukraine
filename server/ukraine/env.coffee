@@ -107,25 +107,24 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
             # Get the current routes.
             old = JSON.parse fs.readFileSync p = path.resolve(__dirname, '../routes.json')
             # Store the new routes here.
-            nu = {}
+            rtr = {}
             # Update to a new port?
             unless (do ->
                 found = false
-                for a, b in old.router
-                    [ ip, name ] = a.split('/')
+                for internal, external of old.router
                     # A new port?
-                    if name is APP_NAME
-                        b = "#{ip}/#{port}" ; found = true
+                    if internal.split('/')[1] is APP_NAME
+                        external = "#{ip}/#{port}" ; found = true
                     # Save it.
-                    nu[a] = b
+                    rtr[internal] = external
                 found
             )                
                 # Add a new route then mapping from the outside in.
-                nu["#{CFG.proxy_host}/#{APP_NAME}/"] = "127.0.0.1:#{port}"
+                rtr["#{CFG.proxy_host}/#{APP_NAME}/"] = "127.0.0.1:#{port}"
 
             # Write it.
             id = fs.openSync p, 'w', 0o0666
-            fs.writeSync id, JSON.stringify({'router': nu}), null, 'utf8'
+            fs.writeSync id, JSON.stringify({'router': rtr}, null, 4), null, 'utf8'
     # OK or bust.
     ).done(
         ->

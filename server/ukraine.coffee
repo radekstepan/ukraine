@@ -28,14 +28,14 @@ winston.debug 'Trying to load config'
 
 # Load config.
 try
-    cfg = JSON.parse fs.readFileSync(path.resolve(__dirname, '../config.json')).toString('utf-8')
+    CFG = JSON.parse fs.readFileSync(path.resolve(__dirname, '../config.json')).toString('utf-8')
 catch e
     return winston.error e.message
 
 winston.debug 'Trying to spawn proxy server'
 
 # Create a proxy server listening on port 80 routing to apps in a dynamic `routes` file.
-proxy.createServer('router': path.resolve(__dirname, 'routes.json')).listen(cfg.proxy_port)
+proxy.createServer('router': path.resolve(__dirname, 'routes.json')).listen(CFG.proxy_port)
 
 winston.debug 'Trying to use custom haibu plugins'
 
@@ -49,7 +49,7 @@ winston.debug 'Trying to start haibu drone'
 # Create the hive on port 9002.
 haibu.drone.start
     'env': 'development'
-    'port': cfg.haibu_port
+    'port': CFG.haibu_port
     'host': '127.0.0.1'
 , ->
     # Following will be monkey patching the router with our own functionality.
@@ -66,13 +66,13 @@ haibu.drone.start
     
     # Traverse running apps.
     table = {}
-    ( table["#{cfg.proxy_host}/#{app.name}/"] = "127.0.0.1:#{app.port}" for app in haibu.running.drone.running() )
+    ( table["#{CFG.proxy_host}/#{app.name}/"] = "127.0.0.1:#{app.port}" for app in haibu.running.drone.running() )
 
     # Write the routing table.
     id = fs.openSync path.resolve(__dirname, 'routes.json'), 'w', 0o0666
     fs.writeSync id, JSON.stringify({'router': table}, null, 4), null, 'utf8'
 
     # We done.
-    winston.info 'haibu'.grey + ' listening on port ' + new String(cfg.haibu_port).bold
-    winston.info 'http-proxy'.grey + ' listening on port ' + new String(cfg.proxy_port).bold
+    winston.info 'haibu'.grey + ' listening on port ' + new String(CFG.haibu_port).bold
+    winston.info 'http-proxy'.grey + ' listening on port ' + new String(CFG.proxy_port).bold
     winston.info 'cloud apps live in ' + path.resolve(__dirname, '../node_modules/haibu/local').bold
