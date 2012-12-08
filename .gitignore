@@ -1,1 +1,3 @@
 node_modules/
+server/routes.json
+server/env.json
