@@ -53,11 +53,9 @@ Architecture
 ------------
 
 ukraine
-    Spawns a ``node-http-proxy`` server that dynamically watches for changes in a routing table. It also uses a custom loader over ``haibu`` injecting a plugin called ``kgb`` that wiretap listens if a new app has been spawned. If it was, it updates the routing table.
+    Spawns a ``node-http-proxy`` server that dynamically watches for changes in a routing table. All (useful) routes to ``haibu`` have been overwritten using promises.
     
-    There is also a plugin called ``ducktape`` in use that will cleanup any local files before attempting to spawn a new app. Otherwise, we would constantly be spawning an older version of an app.
-
-    For posting env variables, we add a new router method that maintains a list of apps to env vars passed by the user. We save the new environment and then custom restart the app for the changes to take effect.
+    New method for posting env vars has been added.
 
 chernobyl
     #. checks that your app's `package.json` file is in order

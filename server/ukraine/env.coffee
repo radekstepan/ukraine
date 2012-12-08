@@ -3,7 +3,6 @@ fs      = require 'fs'
 path    = require 'path'
 winston = require 'winston'
 Q       = require 'q'
-wrench  = require 'wrench'
 
 haibu = require '../../node_modules/haibu/lib/haibu.js' # direct path to local haibu!
 
@@ -134,5 +133,5 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
         , (err) ->
             haibu.sendResponse res, 500,
                 'error':
-                    'message': err.message
+                    'message': err.message or err
     )

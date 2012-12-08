@@ -70,9 +70,6 @@ task.stop = (ukraine_ip, app_dir, cfg) ->
             request
                 'uri': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}/stop"
                 'method': 'POST'
-                'json':
-                    'stop':
-                        'name': pkg.name
             , (err, res, body) ->
                 if err then def.reject err
                 else if res.statusCode isnt 200 then def.reject body?.error?.message or body

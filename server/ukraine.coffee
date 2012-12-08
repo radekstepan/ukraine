@@ -32,13 +32,13 @@ winston.debug 'Trying to spawn proxy server'
 proxy.createServer('router': path.resolve(__dirname, 'routes.json')).listen(cfg.proxy_port)
 
 # Inject our own plugins.
-for plugin in [ 'kgb', 'ducktape' ]
+for plugin in [ 'ducktape' ]
     haibu.__defineGetter__ plugin, -> require path.resolve(__dirname, "#{plugin}.coffee")
 
 winston.debug 'Trying to use custom haibu plugins'
 
 # Use these plugins.
-( haibu.use(haibu[plugin], {}) for plugin in [ 'advanced-replies', 'kgb', 'ducktape' ] )
+( haibu.use(haibu[plugin], {}) for plugin in [ 'ducktape' ] )
 
 winston.debug 'Trying to start haibu drone'
 
@@ -50,6 +50,9 @@ haibu.drone.start
 , ->
     # Following will be monkey patching the router with our own functionality.
     winston.debug 'Adding custom routes'
+
+    # Remove all the original routes.
+    haibu.router.routes = {}
 
     for file in wrench.readdirSyncRecursive path.resolve __dirname, './ukraine/'
         require './ukraine/' + file

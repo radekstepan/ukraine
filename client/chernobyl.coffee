@@ -27,8 +27,6 @@ help = ->
     winston.help '  chernobyl deploy'
     winston.help 'To stop an app in the cloud'.cyan
     winston.help '  chernobyl stop'
-    winston.help 'To list apps in the cloud'.cyan
-    winston.help '  chernobyl list'
     winston.help 'To send an environment variable'.cyan
     winston.help '  chernobyl env ... <key>="<value>"'
     winston.help ''
@@ -49,7 +47,7 @@ else
 
     # Which task?    
     switch task
-        when 'deploy', 'stop', 'list', 'env'
+        when 'deploy', 'stop', 'env'
             # Has the user supplied a path to ukraine?
             unless ukraine_ip
                 winston.error "Path to #{'ukraine'.grey} not specified"

@@ -84,20 +84,12 @@ task.deploy = (ukraine_ip, app_dir, cfg) ->
 
             def = Q.defer()
 
-            request.get {'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/running"}, (err, res, body) ->
+            request.get {'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}"}, (err, res, body) ->
                 if err then def.reject err
-                else if res.statusCode isnt 200 then def.reject body
+                else if res.statusCode isnt 200 then def.resolve [ false, pkg ]
                 else
-                    # All the drones currently running.
-                    drones = JSON.parse(body)
-                    # Is our app running already?
-                    for drone in drones
-                        if drone.user is APP_USER and drone.name is pkg.name
-                            winston.warn pkg.name.bold + ' exists already'
-                            return def.resolve [ true, pkg ]
-
-                    # All went fine.
-                    def.resolve [ false, pkg ]
+                    winston.warn pkg.name.bold + ' exists already'
+                    def.resolve [ true, pkg ]
 
             def.promise
     # If we are passed an id of an app to stop, we will attempt to stop it.
@@ -113,9 +105,6 @@ task.deploy = (ukraine_ip, app_dir, cfg) ->
                 request
                     'uri': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}/stop"
                     'method': 'POST'
-                    'json':
-                        'stop':
-                            'name': pkg.name
                 , (err, res, body) ->
                     if err then def.reject err
                     else if res.statusCode isnt 200 then def.reject body
@@ -160,7 +149,7 @@ task.deploy = (ukraine_ip, app_dir, cfg) ->
                 .pipe(zlib.Gzip())
                 .pipe(
                     request.post
-                        'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/deploy/#{APP_USER}/#{pkg.name}"
+                        'url': "http://#{ukraine_ip}:#{cfg.haibu_port}/drones/#{pkg.name}/deploy"
                     , response
                 )
 
