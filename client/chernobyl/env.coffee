@@ -85,7 +85,7 @@ task.env = (ukraine_ip, app_dir, key_value, cfg) ->
             winston.info 'Trying to send env var for ' + pkg.name.bold
 
             request
-                'uri': "http://#{ukraine_ip}:#{cfg.haibu_port}/env/#{APP_USER}/#{pkg.name}"
+                'uri': "http://#{ukraine_ip}:#{cfg.haibu_port}/env/#{pkg.name}"
                 'method': 'POST'
                 # The data to send.
                 'json':
