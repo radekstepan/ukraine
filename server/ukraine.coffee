@@ -18,6 +18,12 @@ winston.help ''
 haibu = require '../node_modules/haibu/lib/haibu.js' # direct path to local haibu!
 proxy = require 'http-proxy'
 
+winston.debug 'Creating new routing and nev table?'
+
+# Do we need to init routing and env tables?
+unless fs.existsSync(p = path.resolve(__dirname, "./routes.json")) then fs.writeFileSync p, '{"router":{}}'
+unless fs.existsSync(p = path.resolve(__dirname, "./env.json")) then fs.writeFileSync p, '{}'
+
 winston.debug 'Trying to load config'
 
 # Load config.
