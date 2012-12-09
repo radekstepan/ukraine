@@ -16,6 +16,17 @@ Install the package globally:
 
     $ sudo npm install ukraine -g
 
+Create a ``config.json`` file if not present already in the lib's root:
+
+.. code-block:: json
+
+    {
+        "haibu_port": 9002,
+        "proxy_port": 80,
+        "proxy_host": "127.0.0.1",
+        "auth_token": "abc"
+    }
+
 As a server
 ~~~~~~~~~~~
 
