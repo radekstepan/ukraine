@@ -2,77 +2,151 @@
 fs      = require 'fs'
 path    = require 'path'
 winston = require 'winston'
-wrench  = require 'wrench'
+Q       = require 'q'
 
 # CLI output on the default output.
 winston.cli()
 
-winston.info "Welcome to #{'ukraine'.grey} comrade"
+# Welcome header.
+Q.fcall(
+    ->
+        def = Q.defer()
 
-# Show welcome logo and desc.
-( winston.help line.cyan.bold for line in fs.readFileSync(path.resolve(__dirname, 'logo.txt')).toString('utf-8').split('\n') )
-winston.help ''
-winston.help 'Management of Node.js cloud apps'
-winston.help ''
+        winston.info "Welcome to #{'ukraine'.grey} comrade"
 
-haibu = require '../node_modules/haibu/lib/haibu.js' # direct path to local haibu!
-proxy = require 'http-proxy'
+        fs.readFile path.resolve(__dirname, 'logo.txt'), (err, data) ->
+            if err then def.reject err
+            
+            ( winston.help line.cyan.bold for line in data.toString('utf-8').split('\n') )
 
-winston.debug 'Creating new routing and nev table?'
+            winston.help ''
+            winston.help 'Management of Node.js cloud apps'
+            winston.help ''
 
+            def.resolve()
+
+        def.promise
 # Do we need to init routing and env tables?
-unless fs.existsSync(p = path.resolve(__dirname, "./routes.json")) then fs.writeFileSync p, JSON.stringify {"router":{}}, null, 4
-unless fs.existsSync(p = path.resolve(__dirname, "./env.json")) then fs.writeFileSync p, '{}'
+).then(
+    ->
+        winston.debug 'Creating new routing and env table?'
 
-winston.debug 'Trying to load config'
-
+        Q.all [->
+            def = Q.defer()
+            fs.exists p = path.resolve(__dirname, "./routes.json"), (exists) ->
+                unless exists
+                    fs.writeFile p, JSON.stringify({"router":{}}, null, 4), (err) ->
+                        if err then def.reject err
+                        else def.resolve()
+                else def.resolve()
+            def.promise
+        , ->
+            def = Q.defer()
+            fs.exists p = path.resolve(__dirname, "./env.json"), (exists) ->
+                unless exists
+                    fs.writeFile p, '{}', (err) ->
+                        if err then def.reject err
+                        else def.resolve()
+                else def.resolve()
+            def.promise
+        ]
 # Load config.
-try
-    CFG = JSON.parse fs.readFileSync(path.resolve(__dirname, '../config.json')).toString('utf-8')
-catch e
-    return winston.error e.message
+).then(
+    ->
+        winston.debug 'Trying to load config'
 
-winston.debug 'Trying to spawn proxy server'
+        def = Q.defer()
+        
+        fs.readFile path.resolve(__dirname, '../config.json'), (err, data) ->
+            if err then def.reject err
+            try
+                def.resolve JSON.parse data
+            catch e
+                def.reject e.message
 
-# Create a proxy server listening on port 80 routing to apps in a dynamic `routes` file.
-proxy.createServer('router': path.resolve(__dirname, 'routes.json')).listen(CFG.proxy_port)
+        def.promise
+# Spawn proxy.
+).when(
+    (cfg) ->
+        winston.debug 'Trying to spawn proxy server'
 
-winston.debug 'Trying to use custom haibu plugins'
+        proxy = require 'http-proxy'
 
-# Inject our own plugins.
-for plugin in [ 'ducktape' ]
-    haibu.__defineGetter__ plugin, -> require path.resolve(__dirname, "#{plugin}.coffee")
-    haibu.use(haibu[plugin], {})
+        # Create a proxy server listening on port 80 routing to apps in a dynamic `routes` file.
+        proxy.createServer('router': path.resolve(__dirname, 'routes.json')).listen(cfg.proxy_port)
 
-winston.debug 'Trying to start haibu drone'
+        cfg
+# Custom haibu plugins.
+).when(
+    (cfg) ->
+        winston.debug 'Trying to use custom haibu plugins'
 
-# Create the hive on port 9002.
-haibu.drone.start
-    'env': 'development'
-    'port': CFG.haibu_port
-    'host': '127.0.0.1'
-, ->
-    # Following will be monkey patching the router with our own functionality.
-    winston.debug 'Adding custom routes'
+        haibu = require '../node_modules/haibu/lib/haibu.js' # direct path to local haibu!
 
-    # Remove all the original routes.
-    haibu.router.routes = {}
+        # Inject our own plugins.
+        for plugin in [ 'ducktape' ]
+            haibu.__defineGetter__ plugin, -> require path.resolve(__dirname, "#{plugin}.coffee")
+            haibu.use(haibu[plugin], {})
 
-    for file in wrench.readdirSyncRecursive path.resolve __dirname, './ukraine/'
-        require './ukraine/' + file
+        [ cfg, haibu ]
+# Spawn haibu.
+).then(
+    ([ cfg, haibu ]) ->
+        winston.debug 'Trying to start haibu drone'
 
-    # See which apps have been re-spawned from a previous session and update our routes.
-    winston.debug 'Updating proxy routing table'
-    
-    # Traverse running apps.
-    table = {}
-    ( table["#{CFG.proxy_host}/#{app.name}/"] = "127.0.0.1:#{app.port}" for app in haibu.running.drone.running() )
+        def = Q.defer()
 
-    # Write the routing table.
-    id = fs.openSync path.resolve(__dirname, 'routes.json'), 'w', 0o0666
-    fs.writeSync id, JSON.stringify({'router': table}, null, 4), null, 'utf8'
+        # Create the hive on port 9002.
+        haibu.drone.start
+            'env': 'development'
+            'port': cfg.haibu_port
+            'host': '127.0.0.1'
+        , ->
+            def.resolve [ cfg, haibu ]
 
-    # We done.
-    winston.info 'haibu'.grey + ' listening on port ' + new String(CFG.haibu_port).bold
-    winston.info 'http-proxy'.grey + ' listening on port ' + new String(CFG.proxy_port).bold
-    winston.info 'cloud apps live in ' + path.resolve(__dirname, '../node_modules/haibu/local').bold
+        def.promise
+).then(
+    ([ cfg, haibu ]) ->
+        # Following will be monkey patching the router with our own functionality.
+        winston.debug 'Adding custom routes'
+
+        def = Q.defer()
+
+        # Remove all the original routes.
+        haibu.router.routes = {}
+
+        fs.readdir path.resolve(__dirname, './ukraine/'), (err, files) ->
+            if err then def.reject err
+            else
+                ( require './ukraine/' + file for file in files )
+                def.resolve [ cfg, haibu ]
+
+        def.promise
+# See which apps have been re-spawned from a previous session and update our routes.
+).then(
+    ([ cfg, haibu ]) ->
+        winston.debug 'Updating proxy routing table'
+
+        # Traverse running apps.
+        table = {}
+        ( table["#{cfg.proxy_host}/#{app.name}/"] = "127.0.0.1:#{app.port}" for app in haibu.running.drone.running() )
+
+        def = Q.defer()
+
+        # Write the routing table.
+        fs.writeFile path.resolve(__dirname, 'routes.json'), JSON.stringify({'router': table}, null, 4), (err) ->
+            if err then def.reject err.message
+            else def.resolve cfg
+
+        def.promise
+# OK or bust.
+).done(
+    (cfg) ->
+        # We done.
+        winston.info 'haibu'.grey + ' listening on port ' + new String(cfg.haibu_port).bold
+        winston.info 'http-proxy'.grey + ' listening on port ' + new String(cfg.proxy_port).bold
+        winston.info 'cloud apps live in ' + path.resolve(__dirname, '../node_modules/haibu/local').bold
+        winston.info 'ukraine'.grey + ' started ' + 'ok'.green.bold
+    , (err) ->
+        winston.error err.message or err
+)

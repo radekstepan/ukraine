@@ -24,22 +24,38 @@ haibu.router.post '/drones/:name/stop', {} , (APP_NAME) ->
     # Update the routing table.
     ).then(
         ->
-            winston.debug 'Updating routing table'
+            winston.debug 'Updating proxy routes'
 
             routes = path.resolve(__dirname, '../routes.json')
 
             # Get the current routes.
-            old = JSON.parse fs.readFileSync routes
-            # Store the new routes here.
-            rtr = {}
-            # Remove the app if present.
-            for external, internal of old.router
-                # Save it unless it is our app.
-                rtr[external] = internal unless external.split('/')[1] is APP_NAME
+            Q.fcall( ->
+                def = Q.defer()
 
+                fs.readFile routes, (err, data) ->
+                    if err then def.reject err
+                    def.resolve JSON.parse data
+
+                def.promise
+            # Update.
+            ).then(
+                (old) ->
+                    # Store the new routes here.
+                    rtr = {}
+                    # Remove the app if present.
+                    for external, internal of old.router
+                        # Save it unless it is our app.
+                        rtr[external] = internal unless external.split('/')[1] is APP_NAME
+                    rtr
             # Write it.
-            id = fs.openSync routes, 'w', 0o0666
-            fs.writeSync id, JSON.stringify({'router': rtr}, null, 4), null, 'utf8'
+            ).when(
+                (rtr) ->
+                    def = Q.defer()
+                    fs.writeFile routes, JSON.stringify({'router': rtr}, null, 4), (err) ->
+                        if err then def.reject err
+                        else def.resolve()
+                    def.promise
+            )
     # OK or bust.
     ).done(
         ->

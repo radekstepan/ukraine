@@ -50,31 +50,47 @@ haibu.router.post '/drones/:name/deploy', { 'stream': true } , (APP_NAME) ->
     # Update the routing table.
     ).then(
         (port) ->
-            winston.debug 'Updating routing table'
+            winston.debug 'Updating proxy routes'
 
             routes = path.resolve(__dirname, '../routes.json')
 
             # Get the current routes.
-            old = JSON.parse fs.readFileSync routes
-            # Store the new routes here.
-            rtr = {}
-            # Update to a new port?
-            unless (do ->
-                found = false
-                for external, internal of old.router
-                    # A new port?
-                    if external.split('/')[1] is APP_NAME
-                        internal = "127.0.0.1:#{port}" ; found = true
-                    # Save it back.
-                    rtr[external] = internal
-                found
-            )
-                # Add a new route then mapping from the outside in.
-                rtr["#{CFG.proxy_host}/#{APP_NAME}/"] = "127.0.0.1:#{port}"
+            Q.fcall( ->
+                def = Q.defer()
 
+                fs.readFile routes, (err, data) ->
+                    if err then def.reject err
+                    def.resolve JSON.parse data
+
+                def.promise
+            # Update.
+            ).then(
+                (old) ->
+                    # Store the new routes here.
+                    rtr = {}
+                    # Update to a new port?
+                    unless (do ->
+                        found = false
+                        for external, internal of old.router
+                            # A new port?
+                            if external.split('/')[1] is APP_NAME
+                                internal = "127.0.0.1:#{port}" ; found = true
+                            # Save it back.
+                            rtr[external] = internal
+                        found
+                    )
+                        # Add a new route then mapping from the outside in.
+                        rtr["#{CFG.proxy_host}/#{APP_NAME}/"] = "127.0.0.1:#{port}"
+                    rtr
             # Write it.
-            id = fs.openSync routes, 'w', 0o0666
-            fs.writeSync id, JSON.stringify({'router': rtr}, null, 4), null, 'utf8'
+            ).when(
+                (rtr) ->
+                    def = Q.defer()
+                    fs.writeFile routes, JSON.stringify({'router': rtr}, null, 4), (err) ->
+                        if err then def.reject err
+                        else def.resolve()
+                    def.promise
+            )
     # OK or bust.
     ).done(
         ->

@@ -31,16 +31,30 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
             winston.debug 'Setting property in local env file.'
 
             # Get the file.
-            env = JSON.parse fs.readFileSync p = path.resolve(__dirname, '../env.json')
-            
-            # Set the new value.
-            env[APP_USER] ?= {}
-            env[APP_USER][APP_NAME] ?= {}
-            env[APP_USER][APP_NAME][req.body.key] = req.body.value
+            Q.fcall( ->
+                def = Q.defer()
 
+                fs.readFile p = path.resolve(__dirname, '../env.json'), (err, data) ->
+                    if err then def.reject err
+                    env = JSON.parse data
+
+                    # Set the new value.
+                    env[APP_USER] ?= {}
+                    env[APP_USER][APP_NAME] ?= {}
+                    env[APP_USER][APP_NAME][req.body.key] = req.body.value
+
+                    def.resolve [ p, env ]
+
+                def.promise
             # Write it.
-            id = fs.openSync p, 'w', 0o0666
-            fs.writeSync id, JSON.stringify(env, null, 4), null, 'utf8'
+            ).when(
+                ([ p, env ]) ->
+                    def = Q.defer()
+                    fs.writeFile p, JSON.stringify(env, null, 4), (err) ->
+                        if err then def.reject err
+                        else def.resolve()
+                    def.promise
+            )
     # Get the hash and package dir of the running app.
     ).then(
         ->
@@ -104,27 +118,45 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
         (port) ->
             winston.debug 'Updating proxy routes'
 
-            # Get the current routes.
-            old = JSON.parse fs.readFileSync p = path.resolve(__dirname, '../routes.json')
-            # Store the new routes here.
-            rtr = {}
-            # Update to a new port?
-            unless (do ->
-                found = false
-                for internal, external of old.router
-                    # A new port?
-                    if internal.split('/')[1] is APP_NAME
-                        external = "#{ip}/#{port}" ; found = true
-                    # Save it.
-                    rtr[internal] = external
-                found
-            )                
-                # Add a new route then mapping from the outside in.
-                rtr["#{CFG.proxy_host}/#{APP_NAME}/"] = "127.0.0.1:#{port}"
+            routes = path.resolve(__dirname, '../routes.json')
 
+            # Get the current routes.
+            Q.fcall( ->
+                def = Q.defer()
+
+                fs.readFile routes, (err, data) ->
+                    if err then def.reject err
+                    def.resolve JSON.parse data
+
+                def.promise
+            # Update.
+            ).then(
+                (old) ->
+                    # Store the new routes here.
+                    rtr = {}
+                    # Update to a new port?
+                    unless (do ->
+                        found = false
+                        for external, internal of old.router
+                            # A new port?
+                            if external.split('/')[1] is APP_NAME
+                                internal = "127.0.0.1:#{port}" ; found = true
+                            # Save it back.
+                            rtr[external] = internal
+                        found
+                    )
+                        # Add a new route then mapping from the outside in.
+                        rtr["#{CFG.proxy_host}/#{APP_NAME}/"] = "127.0.0.1:#{port}"
+                    rtr
             # Write it.
-            id = fs.openSync p, 'w', 0o0666
-            fs.writeSync id, JSON.stringify({'router': rtr}, null, 4), null, 'utf8'
+            ).when(
+                (rtr) ->
+                    def = Q.defer()
+                    fs.writeFile routes, JSON.stringify({'router': rtr}, null, 4), (err) ->
+                        if err then def.reject err
+                        else def.resolve()
+                    def.promise
+            )
     # OK or bust.
     ).done(
         ->
