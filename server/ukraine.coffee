@@ -31,25 +31,29 @@ Q.fcall(
     ->
         winston.debug 'Creating new routing and env table?'
 
-        Q.all [->
+        routes = Q.fcall( ->
             def = Q.defer()
-            fs.exists p = path.resolve(__dirname, "./routes.json"), (exists) ->
+            fs.exists p = path.resolve(__dirname, './routes.json'), (exists) ->
                 unless exists
                     fs.writeFile p, JSON.stringify({"router":{}}, null, 4), (err) ->
                         if err then def.reject err
                         else def.resolve()
                 else def.resolve()
             def.promise
-        , ->
+        )
+
+        env = Q.fcall( ->
             def = Q.defer()
-            fs.exists p = path.resolve(__dirname, "./env.json"), (exists) ->
+            fs.exists p = path.resolve(__dirname, './env.json'), (exists) ->
                 unless exists
                     fs.writeFile p, '{}', (err) ->
                         if err then def.reject err
                         else def.resolve()
                 else def.resolve()
             def.promise
-        ]
+        )
+
+        Q.all [ routes, env ]
 # Load config.
 ).then(
     ->
@@ -73,7 +77,7 @@ Q.fcall(
         proxy = require 'http-proxy'
 
         # Create a proxy server listening on port 80 routing to apps in a dynamic `routes` file.
-        proxy.createServer('router': path.resolve(__dirname, 'routes.json')).listen(cfg.proxy_port)
+        proxy.createServer('router': path.resolve(__dirname, './routes.json')).listen(cfg.proxy_port)
 
         cfg
 # Custom haibu plugins.
