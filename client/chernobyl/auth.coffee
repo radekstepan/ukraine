@@ -54,7 +54,8 @@ task.auth = (ukraine_ip, auth_token, cfg) ->
             winston.info 'Auth key saved ' + 'ok'.green.bold
         , (err) ->
             try
-                winston.error (JSON.parse(err)).message
+                err = JSON.parse(err)
+                winston.error err.error.message or err.message or err
             catch e
                 winston.error err
     )

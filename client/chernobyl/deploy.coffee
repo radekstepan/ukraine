@@ -130,7 +130,8 @@ task.deploy = (ukraine_ip, app_dir, cfg) ->
             winston.info pkg.name.bold + ' deployed ' + 'ok'.green.bold
         , (err) ->
             try
-                winston.error (JSON.parse(err)).message
+                err = JSON.parse(err)
+                winston.error err.error.message or err.message or err
             catch e
                 winston.error err
     )

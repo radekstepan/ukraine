@@ -122,7 +122,8 @@ task.env = (ukraine_ip, app_dir, key_value, cfg) ->
             winston.info 'Environment variable ' + key.bold  + ' for ' + pkg.name.bold + ' set ' + 'ok'.green.bold
         , (err) ->
             try
-                winston.error (JSON.parse(err)).message
+                err = JSON.parse(err)
+                winston.error err.error.message or err.message or err
             catch e
                 winston.error err
     )
