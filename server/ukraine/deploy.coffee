@@ -80,7 +80,7 @@ haibu.router.post '/drones/:name/deploy', { 'stream': true } , (APP_NAME) ->
                         found
                     )
                         # Add a new route then mapping from the outside in.
-                        rtr["#{CFG.proxy_host}/#{APP_NAME}/"] = "127.0.0.1:#{port}"
+                        rtr["#{CFG.proxy_host}:#{CFG.proxy_port}/#{APP_NAME}/"] = "127.0.0.1:#{port}"
                     rtr
             # Write it.
             ).when(
