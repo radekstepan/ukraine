@@ -136,7 +136,7 @@ Q.fcall(
         save = (app_name, app_port) ->
             if cfg.proxy_port is 80
                 table["#{cfg.proxy_host}/#{app_name}/"] = "127.0.0.1:#{app_port}"
-            eles
+            else
                 table["#{cfg.proxy_host}:#{cfg.proxy_port}/#{app_name}/"] = "127.0.0.1:#{app_port}"
         ( save(app.name, app.port) for app in haibu.running.drone.running() )
 
