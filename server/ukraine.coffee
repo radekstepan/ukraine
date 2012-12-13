@@ -133,7 +133,7 @@ Q.fcall(
 
         # Traverse running apps.
         table = {}
-        ( table["#{cfg.proxy_host}/#{app.name}/"] = "127.0.0.1:#{app.port}" for app in haibu.running.drone.running() )
+        ( table["#{cfg.proxy_host}:#{cfg.proxy_port}/#{app.name}/"] = "127.0.0.1:#{app.port}" for app in haibu.running.drone.running() )
 
         def = Q.defer()
 
