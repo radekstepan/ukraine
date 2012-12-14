@@ -26,34 +26,6 @@ Q.fcall(
             def.resolve()
 
         def.promise
-# Do we need to init routing and env tables?
-).then(
-    ->
-        winston.debug 'Creating new routing and env table?'
-
-        routes = Q.fcall( ->
-            def = Q.defer()
-            fs.exists p = path.resolve(__dirname, './routes.json'), (exists) ->
-                unless exists
-                    fs.writeFile p, '{}', (err) ->
-                        if err then def.reject err
-                        else def.resolve()
-                else def.resolve()
-            def.promise
-        )
-
-        env = Q.fcall( ->
-            def = Q.defer()
-            fs.exists p = path.resolve(__dirname, './env.json'), (exists) ->
-                unless exists
-                    fs.writeFile p, '{}', (err) ->
-                        if err then def.reject err
-                        else def.resolve()
-                else def.resolve()
-            def.promise
-        )
-
-        Q.all [ routes, env ]
 # Load config.
 ).then(
     ->
@@ -74,9 +46,37 @@ Q.fcall(
                 def.reject e.message
 
         def.promise
+# Do we need to init routing and env tables?
+).then(
+    (cfg) ->
+        winston.debug 'Creating new routing and env table?'
+
+        routes = Q.fcall( ->
+            def = Q.defer()
+            fs.exists p = path.resolve(__dirname, './routes.json'), (exists) ->
+                unless exists
+                    fs.writeFile p, '{}', (err) ->
+                        if err then def.reject err
+                        else def.resolve cfg
+                else def.resolve cfg
+            def.promise
+        )
+
+        env = Q.fcall( ->
+            def = Q.defer()
+            fs.exists p = path.resolve(__dirname, './env.json'), (exists) ->
+                unless exists
+                    fs.writeFile p, JSON.stringify({ 'router': {}, 'hostnameOnly': cfg.proxy_hostname_only }, null, 4), (err) ->
+                        if err then def.reject err
+                        else def.resolve cfg
+                else def.resolve cfg
+            def.promise
+        )
+
+        Q.all [ routes, env ]
 # Spawn proxy.
 ).when(
-    (cfg) ->
+    ( [ cfg ] ) ->
         winston.debug 'Trying to spawn proxy server'
 
         proxy = require 'http-proxy'
