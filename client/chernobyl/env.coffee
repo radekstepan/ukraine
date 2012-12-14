@@ -123,7 +123,7 @@ task.env = (ukraine_ip, app_dir, key_value, cfg) ->
         , (err) ->
             try
                 err = JSON.parse(err)
-                winston.error err.error.message or err.message or err
+                winston.error err?.error?.message or err?.message or err
             catch e
-                winston.error err
+                winston.error err?.error?.message or err?.message or err
     )
