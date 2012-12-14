@@ -140,7 +140,7 @@ Q.fcall(
         table = {}
         save = (app_name, app_port) ->
             # Are we using non standard port? Else leave it out.
-            port = (if (cfg.proxy_port isnt 80) then ':' + cfg.proxy_port else '') + '/'
+            port = (if (cfg.proxy_port isnt 80) then ":#{cfg.proxy_port}/" else '')
             # 'Hostname Only' ProxyTable?
             if cfg.proxy_hostname_only?
                 table["#{app_name}.#{cfg.proxy_host}#{port}"] = "127.0.0.1:#{app_port}"

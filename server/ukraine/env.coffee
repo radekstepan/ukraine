@@ -146,7 +146,7 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
                         found
                     )
                         # Are we using non standard port? Else leave it out.
-                        p = (if (CFG.proxy_port isnt 80) then ':' + CFG.proxy_port else '') + '/'
+                        p = (if (CFG.proxy_port isnt 80) then ":#{CFG.proxy_port}/" else '')
                         # 'Hostname Only' ProxyTable?
                         if CFG.proxy_hostname_only?
                             rtr["#{APP_NAME}.#{CFG.proxy_host}#{p}"] = "127.0.0.1:#{port}"
