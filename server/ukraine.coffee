@@ -69,6 +69,72 @@ Q.fcall(
                 def.reject e.message
 
         def.promise
+# Start DNS?
+).when(
+    (cfg) ->
+        return cfg unless cfg.use_dns?
+
+        winston.debug 'Trying to startup DNS server'
+
+        def = Q.defer()
+
+        # Use `native-dns` package.
+        dns = require 'native-dns'
+
+        # Listen on both types.
+        server = dns.createServer()
+        tcpserver = dns.createTCPServer()
+
+        onMessage = (request, response) ->          
+            console.log request
+            response.answer.push dns.A(
+                name: request.question[0].name
+                address: "127.0.0.1"
+                ttl: 600
+            )
+            response.answer.push dns.A(
+                name: request.question[0].name
+                address: "127.0.0.2"
+                ttl: 600
+            )
+            response.additional.push dns.A(
+                name: "hostA.example.org"
+                address: "127.0.0.3"
+                ttl: 600
+            )
+          
+            response.send()
+
+        onError = (err, buff, req, res) ->
+            console.log err.stack
+
+        onListening = ->
+            console.log "server listening on", @address()
+            def.resolve cfg
+
+        onSocketError = (err, socket) ->
+            console.log err
+
+        onClose = ->
+            console.log "server closed", @address()
+
+        server.on "request", onMessage
+        server.on "error", onError
+        server.on "listening", onListening
+        server.on "socketError", onSocketError
+        server.on "close", onClose
+        
+        server.serve 53, "127.0.0.1"
+        
+        tcpserver.on "request", onMessage
+        tcpserver.on "error", onError
+        tcpserver.on "listening", onListening
+        tcpserver.on "socketError", onSocketError
+        tcpserver.on "close", onClose
+        
+        tcpserver.serve 53, "127.0.0.1"
+
+        def.promise
 # Spawn proxy.
 ).when(
     (cfg) ->

@@ -1,7 +1,7 @@
 {
     "name": "ukraine",
     "description": "ukraine glues haibu and node-http-proxy adding a little helper, chernobyl, that deploys into this cloud",
-    "version": "0.10.1",
+    "version": "0.11.0",
     "dependencies": {
         "coffee-script": "1.4.0",
         "winston": "0.6.2",
@@ -13,7 +13,8 @@
         "fstream": "0.1.19",
         "request": "2.12.0",
         "q": "0.8.11",
-        "wrench": "1.4.4"
+        "wrench": "1.4.4",
+        "native-dns": "0.3.3"
     },
     "bin": {
         "ukraine": "./bin/ukraine",
