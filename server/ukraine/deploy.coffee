@@ -79,17 +79,19 @@ haibu.router.post '/drones/:name/deploy', { 'stream': true } , (APP_NAME) ->
                             rtr[external] = internal
                         found
                     )
-                        # Add a new route then mapping from the outside in.
-                        if CFG.proxy_port is 80
-                            rtr["#{CFG.proxy_host}/#{APP_NAME}/"] = "127.0.0.1:#{port}"
+                        # Are we using non standard port? Else leave it out.
+                        p = (if (CFG.proxy_port isnt 80) then ':' + CFG.proxy_port else '') + '/'
+                        # 'Hostname Only' ProxyTable?
+                        if CFG.proxy_hostname_only?
+                            rtr["#{APP_NAME}.#{CFG.proxy_host}#{p}"] = "127.0.0.1:#{port}"
                         else
-                            rtr["#{CFG.proxy_host}:#{CFG.proxy_port}/#{APP_NAME}/"] = "127.0.0.1:#{port}"
+                            rtr["#{CFG.proxy_host}#{p}#{APP_NAME}/"] = "127.0.0.1:#{port}"
                     rtr
             # Write it.
             ).when(
                 (rtr) ->
                     def = Q.defer()
-                    fs.writeFile routes, JSON.stringify({'router': rtr}, null, 4), (err) ->
+                    fs.writeFile routes, JSON.stringify({ 'router': rtr, 'hostnameOnly': CFG.proxy_hostname_only }, null, 4), (err) ->
                         if err then def.reject err
                         else def.resolve()
                     def.promise

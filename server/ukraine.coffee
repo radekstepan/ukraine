@@ -35,7 +35,7 @@ Q.fcall(
             def = Q.defer()
             fs.exists p = path.resolve(__dirname, './routes.json'), (exists) ->
                 unless exists
-                    fs.writeFile p, JSON.stringify({"router":{}}, null, 4), (err) ->
+                    fs.writeFile p, '{}', (err) ->
                         if err then def.reject err
                         else def.resolve()
                 else def.resolve()
@@ -64,75 +64,14 @@ Q.fcall(
         fs.readFile path.resolve(__dirname, '../config.json'), (err, data) ->
             if err then def.reject err
             try
-                def.resolve JSON.parse data
+                # JSON parse.
+                cfg = JSON.parse data
+                # Add defaults.
+                cfg.proxy_hostname_only ?= false
+                # Resolve.
+                def.resolve cfg
             catch e
                 def.reject e.message
-
-        def.promise
-# Start DNS?
-).when(
-    (cfg) ->
-        return cfg unless cfg.use_dns?
-
-        winston.debug 'Trying to startup DNS server'
-
-        def = Q.defer()
-
-        # Use `native-dns` package.
-        dns = require 'native-dns'
-
-        # Listen on both types.
-        server = dns.createServer()
-        tcpserver = dns.createTCPServer()
-
-        onMessage = (request, response) ->          
-            console.log request
-            response.answer.push dns.A(
-                name: request.question[0].name
-                address: "127.0.0.1"
-                ttl: 600
-            )
-            response.answer.push dns.A(
-                name: request.question[0].name
-                address: "127.0.0.2"
-                ttl: 600
-            )
-            response.additional.push dns.A(
-                name: "hostA.example.org"
-                address: "127.0.0.3"
-                ttl: 600
-            )
-          
-            response.send()
-
-        onError = (err, buff, req, res) ->
-            console.log err.stack
-
-        onListening = ->
-            console.log "server listening on", @address()
-            def.resolve cfg
-
-        onSocketError = (err, socket) ->
-            console.log err
-
-        onClose = ->
-            console.log "server closed", @address()
-
-        server.on "request", onMessage
-        server.on "error", onError
-        server.on "listening", onListening
-        server.on "socketError", onSocketError
-        server.on "close", onClose
-        
-        server.serve 53, "127.0.0.1"
-        
-        tcpserver.on "request", onMessage
-        tcpserver.on "error", onError
-        tcpserver.on "listening", onListening
-        tcpserver.on "socketError", onSocketError
-        tcpserver.on "close", onClose
-        
-        tcpserver.serve 53, "127.0.0.1"
 
         def.promise
 # Spawn proxy.
@@ -200,16 +139,19 @@ Q.fcall(
         # Traverse running apps.
         table = {}
         save = (app_name, app_port) ->
-            if cfg.proxy_port is 80
-                table["#{cfg.proxy_host}/#{app_name}/"] = "127.0.0.1:#{app_port}"
+            # Are we using non standard port? Else leave it out.
+            port = (if (cfg.proxy_port isnt 80) then ':' + cfg.proxy_port else '') + '/'
+            # 'Hostname Only' ProxyTable?
+            if cfg.proxy_hostname_only?
+                table["#{app_name}.#{cfg.proxy_host}#{port}"] = "127.0.0.1:#{app_port}"
             else
-                table["#{cfg.proxy_host}:#{cfg.proxy_port}/#{app_name}/"] = "127.0.0.1:#{app_port}"
+                table["#{cfg.proxy_host}#{port}#{app_name}/"] = "127.0.0.1:#{app_port}"
         ( save(app.name, app.port) for app in haibu.running.drone.running() )
 
         def = Q.defer()
 
         # Write the routing table.
-        fs.writeFile path.resolve(__dirname, 'routes.json'), JSON.stringify({'router': table}, null, 4), (err) ->
+        fs.writeFile path.resolve(__dirname, 'routes.json'), JSON.stringify({ 'router': table, 'hostnameOnly': cfg.proxy_hostname_only }, null, 4), (err) ->
             if err then def.reject err.message
             else def.resolve cfg
 

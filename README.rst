@@ -24,8 +24,20 @@ Create a ``config.json`` file if not present already in the lib's root:
         "haibu_port": 9002,
         "proxy_port": 80,
         "proxy_host": "127.0.0.1",
-        "auth_token": "abc"
+        "auth_token": "abc",
+        "proxy_hostname_only": false
     }
+
+haibu_port
+    On which port to start the Haibu service.
+proxy_port
+    Where will all requests go? If set to ``80``, you will be able to access your apps without providing a port number.
+proxy_host
+    What is the host used in the proxy routing table. This is the 'domain' you will be using to access the running apps.
+auth_token
+    A token that a client will need to use to access the ukraine service. Leaving this property out will not require you to pass a token and is useful for debugging.
+proxy_hostname_only
+    If set to ``true`` your apps will be routed from ``<app_name>.<proxy_host>:<proxy_port>`` instead of ``<proxy_host>:<proxy_port>/<app_name>/``. Useful also in a case when you have links in your app that are root relative.
 
 As a server
 ~~~~~~~~~~~
@@ -56,11 +68,7 @@ Move to a directory with the app to deploy. Deploy pointing to cloud instance:
 Config
 -----------
 
-To set the ports the proxy and haibu are supposed to be listening on, edit the ``config.json`` file. Edit the ``proxy_host`` property there if you are calling your server another name.
-
 For setting environment variables exposed through ``process.env``, set the key value pair ``env`` in your app's ``package.json`` file. You can also use the ``chernobyl`` app itself to pass them if you do not want to expose them in a public ``package.json`` file.
-
-Removing the ``auth_token`` key value pair from the config file will make the service exposed to anyone. You may want to change the value...
 
 Architecture
 ------------
