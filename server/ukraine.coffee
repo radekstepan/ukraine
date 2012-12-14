@@ -55,7 +55,7 @@ Q.fcall(
             def = Q.defer()
             fs.exists p = path.resolve(__dirname, './routes.json'), (exists) ->
                 unless exists
-                    fs.writeFile p, '{}', (err) ->
+                    fs.writeFile p, JSON.stringify({ 'router': {}, 'hostnameOnly': cfg.proxy_hostname_only }, null, 4), (err) ->
                         if err then def.reject err
                         else def.resolve cfg
                 else def.resolve cfg
@@ -66,7 +66,7 @@ Q.fcall(
             def = Q.defer()
             fs.exists p = path.resolve(__dirname, './env.json'), (exists) ->
                 unless exists
-                    fs.writeFile p, JSON.stringify({ 'router': {}, 'hostnameOnly': cfg.proxy_hostname_only }, null, 4), (err) ->
+                    fs.writeFile p, '{}', (err) ->
                         if err then def.reject err
                         else def.resolve cfg
                 else def.resolve cfg
