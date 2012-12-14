@@ -1,19 +1,18 @@
 {
     "name": "ukraine",
     "description": "ukraine glues haibu and node-http-proxy adding a little helper, chernobyl, that deploys into this cloud",
-    "version": "0.11.3",
+    "version": "0.12.0",
     "dependencies": {
         "coffee-script": "1.4.0",
         "winston": "0.6.2",
         "colors": "0.6.0-1",
         "flatiron": "0.3.0",
-        "haibu": "0.9.7",
+        "haibu": "git://github.com/radekstepan/haibu.git#master",
         "http-proxy": "git://github.com/radekstepan/node-http-proxy.git#master",
         "tar": "git://github.com/radekstepan/node-tar.git#master",
         "fstream": "0.1.19",
         "request": "2.12.0",
-        "q": "0.8.11",
-        "wrench": "1.4.4"
+        "q": "0.8.11"
     },
     "bin": {
         "ukraine": "./bin/ukraine",

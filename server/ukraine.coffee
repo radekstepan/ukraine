@@ -26,6 +26,15 @@ Q.fcall(
             def.resolve()
 
         def.promise
+# Create log directory?
+).then(
+    ->
+        winston.debug 'Creating log directory?'
+
+        def = Q.defer()
+        fs.mkdir path.resolve(__dirname, './logs'), (err) ->
+            if err and err.code isnt 'EEXIST' then def.reject(err) else def.resolve()
+        def.promise
 # Load config.
 ).then(
     ->
@@ -85,25 +94,15 @@ Q.fcall(
         proxy.createServer('router': path.resolve(__dirname, './routes.json')).listen(cfg.proxy_port)
 
         cfg
-# Custom haibu plugins.
-).when(
-    (cfg) ->
-        winston.debug 'Trying to use custom haibu plugins'
-
-        haibu = require '../node_modules/haibu/lib/haibu.js' # direct path to local haibu!
-
-        # Inject our own plugins.
-        for plugin in [ 'ducktape' ]
-            haibu.__defineGetter__ plugin, -> require path.resolve(__dirname, "#{plugin}.coffee")
-            haibu.use(haibu[plugin], {})
-
-        [ cfg, haibu ]
 # Spawn haibu.
 ).then(
-    ([ cfg, haibu ]) ->
+    (cfg) ->
         winston.debug 'Trying to start haibu drone'
 
         def = Q.defer()
+
+        # Be sure this is our version of haibu!
+        haibu = require path.resolve __dirname, '../node_modules/haibu/lib/haibu.js'
 
         # Create the hive on port 9002.
         haibu.drone.start

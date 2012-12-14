@@ -1,7 +1,7 @@
 ukraine
 =========
 
-``ukraine`` glues ``haibu`` and ``node-http-proxy`` adding two little helpers, ``chernobyl`` and  ``ducktape``, that deploys into this cloud. It is probably as stable as you think it is.
+``ukraine`` glues ``haibu`` and ``node-http-proxy`` adding a little helper, ``chernobyl``, that deploys into this cloud. It is probably as stable as you think it is.
 
 .. image:: https://raw.github.com/radekstepan/ukraine/master/example.png
 
@@ -99,3 +99,5 @@ Haibu is a poorly written piece of software, be aware of these facts:
 #. When an app is deployed, it might still take a second or two for it to actually show over the proxy server.
 #. Although it should be allowed, haibu only allows to kill an app by its name, not name and username so we all deploy apps into a ``chernobyl`` namespace and if you want to deploy the same app again on a different port, you need to change its ``name`` in ``config.json``.
 #. Restarting the app does not work as one would expect getting the latest env variables, stopping does not either expecting an ``application`` object instead of the ``name`` it is passed from the service. When setting new environment variable, then, we take a custom approach of stopping a running instance, getting the latest hash of its package and starting it again with these settings.
+
+That is why we use our own version of it since `v0.12.0`
