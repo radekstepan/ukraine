@@ -1,6 +1,6 @@
 {
     "name": "ukraine",
-    "description": "ukraine glues haibu and node-http-proxy adding a little helper, chernobyl, that deploys into this cloud",
+    "description": "Open Source Node.js PaaS with automatic Proxy and CLI client",
     "version": "0.12.0",
     "dependencies": {
         "coffee-script": "1.4.0",

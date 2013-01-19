@@ -1,7 +1,9 @@
 ukraine
 =========
 
-Open Source Node.js PaaS with automatic Proxy and CLI client. ``ukraine`` glues ``haibu`` and ``node-http-proxy`` adding a little helper, ``chernobyl``, that deploys into this cloud. It is probably as stable as you think it is.
+Open Source Node.js PaaS with automatic Proxy and CLI client.
+
+``ukraine`` glues ``haibu`` and ``node-http-proxy`` adding a little helper, ``chernobyl``, that deploys into this cloud. It is probably as stable as you think it is.
 
 .. image:: https://raw.github.com/radekstepan/ukraine/master/example.png
 
