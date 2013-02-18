@@ -40,6 +40,8 @@ auth_token
     A token that a client will need to use to access the ukraine service. Leaving this property out will not require you to pass a token and is useful for debugging.
 proxy_hostname_only
     If set to ``true`` your apps will be routed from ``<app_name>.<proxy_host>:<proxy_port>`` instead of ``<proxy_host>:<proxy_port>/<app_name>/``. Useful also in a case when you have links in your app that are root relative.
+root_app
+    Setting this value will define which app should we see if we visit the root of this service in the browser. Bear in mind this option will only work if ``proxy_hostname_only`` is set to true. Otherwise you would only see your root app.
 
 As a server
 ~~~~~~~~~~~

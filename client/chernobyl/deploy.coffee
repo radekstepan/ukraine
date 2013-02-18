@@ -47,7 +47,7 @@ task.deploy = (ukraine_ip, app_dir, cfg) ->
             unless pkg.name and pkg.name.length > 0
                 throw 'name'.grey + ' field needs to be defined in ' + 'package.json'.grey 
             # Special chars?
-            if encodeURIComponent(pkg.name) isnt pkg.name
+            if encodeURIComponent(pkg.name) isnt pkg.name or pkg.name.indexOf('.') isnt -1
                 throw 'name'.grey + ' field in ' + 'package.json'.grey + ' contains characters that are not allowed in a URL'
             pkg
     # Start script field.

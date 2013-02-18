@@ -6,6 +6,9 @@ Q       = require 'q'
 
 haibu = require '../../node_modules/haibu/lib/haibu.js' # direct path to local haibu!
 
+# We request the same file in the main thread.
+CFG = JSON.parse fs.readFileSync(path.resolve(__dirname, '../../config.json')).toString('utf-8')
+
 # POST stop a running drone.
 haibu.router.post '/drones/:name/stop', {} , (APP_NAME) ->
     req = @req ; res = @res
@@ -41,11 +44,30 @@ haibu.router.post '/drones/:name/stop', {} , (APP_NAME) ->
             ).then(
                 (old) ->
                     # Store the new routes here.
-                    rtr = {}
+                    rtr = {} ; dead_port = null
                     # Remove the app if present.
                     for external, internal of old.router
-                        # Save it unless it is our app.
-                        rtr[external] = internal unless external.split('/')[1] is APP_NAME
+                        # Proxy hostname only?
+                        if CFG.proxy_hostname_only
+                            unless external.split('.')[0] is APP_NAME
+                                rtr[external] = internal
+                            else
+                                dead_port = internal.split(':')[1]
+                        # Subdirectory based.
+                        else
+                            # Save it unless it is our app?
+                            unless external.split('/')[1] is APP_NAME
+                                rtr[external] = internal
+                            else
+                                dead_port = internal.split(':')[1]
+                    
+                    # Was this app a root app?
+                    if CFG.root_app and CFG.root_app is APP_NAME
+                        # Find and remove the root app entry too.
+                        for external, internal of rtr
+                            if internal.split(':')[1] is dead_port
+                                delete rtr[external]
+
                     rtr
             # Write it.
             ).when(

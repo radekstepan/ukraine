@@ -140,11 +140,16 @@ Q.fcall(
         save = (app_name, app_port) ->
             # Are we using non standard port? Else leave it out.
             port = (if (cfg.proxy_port isnt 80) then ":#{cfg.proxy_port}/" else '')
+            
             # 'Hostname Only' ProxyTable?
-            if cfg.proxy_hostname_only?
+            if cfg.proxy_hostname_only
                 table["#{app_name}.#{cfg.proxy_host}#{port}"] = "127.0.0.1:#{app_port}"
+                # Root app defined?
+                if cfg.root_app and cfg.root_app is app_name
+                    table["#{cfg.proxy_host}#{port}"] = "127.0.0.1:#{app_port}"
             else
                 table["#{cfg.proxy_host}#{port}#{app_name}/"] = "127.0.0.1:#{app_port}"
+
         ( save(app.name, app.port) for app in haibu.running.drone.running() )
 
         def = Q.defer()

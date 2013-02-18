@@ -81,11 +81,16 @@ haibu.router.post '/drones/:name/deploy', { 'stream': true } , (APP_NAME) ->
                     )
                         # Are we using non standard port? Else leave it out.
                         p = (if (CFG.proxy_port isnt 80) then ":#{CFG.proxy_port}/" else '')
+                        
                         # 'Hostname Only' ProxyTable?
-                        if CFG.proxy_hostname_only?
+                        if CFG.proxy_hostname_only
                             rtr["#{APP_NAME}.#{CFG.proxy_host}#{p}"] = "127.0.0.1:#{port}"
+                            # Root app defined?
+                            if CFG.root_app and CFG.root_app is APP_NAME
+                                rtr["#{CFG.proxy_host}#{p}"] = "127.0.0.1:#{port}"
                         else
                             rtr["#{CFG.proxy_host}#{p}#{APP_NAME}/"] = "127.0.0.1:#{port}"
+                    
                     rtr
             # Write it.
             ).when(
