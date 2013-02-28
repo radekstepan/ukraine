@@ -33,7 +33,7 @@ task.env = (ukraine_ip, app_dir, key_value, cfg) ->
         winston.debug 'Attempting to read ' + 'package.json'.grey + ' file'
         
         def = Q.defer()
-        fs.readFile "#{app_dir}/package.json", 'utf-8', (err, text) ->
+        fs.readFile "#{app_dir}/package.json", 'utf8', (err, text) ->
             if err then def.reject err
             else def.resolve text
         def.promise

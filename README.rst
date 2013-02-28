@@ -40,8 +40,6 @@ auth_token
     A token that a client will need to use to access the ukraine service. Leaving this property out will not require you to pass a token and is useful for debugging.
 proxy_hostname_only
     If set to ``true`` your apps will be routed from ``<app_name>.<proxy_host>:<proxy_port>`` instead of ``<proxy_host>:<proxy_port>/<app_name>/``. Useful also in a case when you have links in your app that are root relative.
-root_app
-    Setting this value will define which app should we see if we visit the root of this service in the browser. Bear in mind this option will only work if ``proxy_hostname_only`` is set to true. Otherwise you would only see your root app.
 
 As a server
 ~~~~~~~~~~~
@@ -73,6 +71,27 @@ Config
 -----------
 
 For setting environment variables exposed through ``process.env``, set the key value pair ``env`` in your app's ``package.json`` file. You can also use the ``chernobyl`` app itself to pass them if you do not want to expose them in a public ``package.json`` file.
+
+Custom domains
+~~~~~~~~~~~~~~
+
+When the ``proxy_hostname_only`` is set to ``true``, one can define custom domains that the app will respond to by editing the ``server/routes.json`` file adding a ``domains`` list under the app's entry. Example:
+
+.. code-block:: javascript
+
+    {
+        "example-app": {
+            "domains": [
+                "helios-one.newvegas"
+            ],
+            "host": "127.0.0.1",
+            "port": 51380
+        }
+    }
+
+This means that if we do not match on an app's name domain which is ``/^example-app.newvegas/i``, we will attempt to match on ``/^helios-one.newvegas/i``.
+
+Changes to this file do not require the restarting of the ``ukraine`` instance. The proxy will route on the first match and goes through the domains in a top to bottom fashion. The order of apps is determined by whatever ``for (key in obj) {}`` returns.
 
 Architecture
 ------------

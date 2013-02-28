@@ -10,7 +10,7 @@ winston.cli()
 winston.info "Welcome to #{'chernobyl'.grey} comrade"
 
 # Show welcome logo and desc.
-( winston.help line.cyan.bold for line in fs.readFileSync(path.resolve(__dirname, 'logo.txt')).toString('utf-8').split('\n') )
+( winston.help line.cyan.bold for line in fs.readFileSync(path.resolve(__dirname, 'logo.txt')).toString('utf8').split('\n') )
 winston.help ''
 winston.help 'Deployment of Node.js cloud apps'
 winston.help ''
@@ -31,7 +31,7 @@ help = ->
 
 # Do we have config available?
 try
-    cfg = JSON.parse fs.readFileSync(path.resolve(__dirname, '../config.json')).toString('utf-8')
+    cfg = JSON.parse fs.readFileSync(path.resolve(__dirname, '../config.json')).toString('utf8')
 catch e
     return winston.error e.message
 

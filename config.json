@@ -1,5 +1,6 @@
 {
     "haibu_port": 9002,
     "proxy_port": 8000,
-    "proxy_host": "127.0.0.1"
+    "proxy_host": "127.0.0.1",
+    "proxy_hostname_only": true
 }

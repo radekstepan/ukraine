@@ -7,6 +7,15 @@ Q       = require 'q'
 # CLI output on the default output.
 winston.cli()
 
+# Load config.
+winston.debug 'Loading config'
+module.exports.cfg = cfg = require path.resolve __dirname, '../config.json'
+
+# Load the router and make it available for everyone else.
+winston.debug 'Loading router'
+Router = require path.resolve __dirname, './ukraine/router.coffee'
+module.exports.router = router = new Router path.resolve __dirname, './routes.json'
+
 # Welcome header.
 Q.fcall(
     ->
@@ -17,7 +26,7 @@ Q.fcall(
         fs.readFile path.resolve(__dirname, 'logo.txt'), (err, data) ->
             if err then def.reject err
             
-            ( winston.help line.cyan.bold for line in data.toString('utf-8').split('\n') )
+            ( winston.help line.cyan.bold for line in data.toString('utf8').split('\n') )
 
             winston.help ''
             winston.help 'Management of Node.js cloud apps'
@@ -26,6 +35,7 @@ Q.fcall(
             def.resolve()
 
         def.promise
+
 # Create log directory?
 ).then(
     ->
@@ -35,68 +45,33 @@ Q.fcall(
         fs.mkdir path.resolve(__dirname, './logs'), (err) ->
             if err and err.code isnt 'EEXIST' then def.reject(err) else def.resolve()
         def.promise
-# Load config.
+
+# Do we need to init env table?
 ).then(
     ->
-        winston.debug 'Trying to load config'
+        winston.debug 'Creating env table?'
 
         def = Q.defer()
-        
-        fs.readFile path.resolve(__dirname, '../config.json'), (err, data) ->
-            if err then def.reject err
-            try
-                # JSON parse.
-                cfg = JSON.parse data
-                # Add defaults.
-                cfg.proxy_hostname_only ?= false
-                # Resolve.
-                def.resolve cfg
-            catch e
-                def.reject e.message
-
+        fs.exists p = path.resolve(__dirname, './env.json'), (exists) ->
+            unless exists
+                fs.writeFile p, '{}', (err) ->
+                    if err then def.reject err
+                    else def.resolve()
+            else def.resolve()
         def.promise
-# Do we need to init routing and env tables?
-).then(
-    (cfg) ->
-        winston.debug 'Creating new routing and env table?'
 
-        routes = Q.fcall( ->
-            def = Q.defer()
-            fs.exists p = path.resolve(__dirname, './routes.json'), (exists) ->
-                unless exists
-                    fs.writeFile p, JSON.stringify({ 'router': {}, 'hostnameOnly': cfg.proxy_hostname_only }, null, 4), (err) ->
-                        if err then def.reject err
-                        else def.resolve cfg
-                else def.resolve cfg
-            def.promise
-        )
-
-        env = Q.fcall( ->
-            def = Q.defer()
-            fs.exists p = path.resolve(__dirname, './env.json'), (exists) ->
-                unless exists
-                    fs.writeFile p, '{}', (err) ->
-                        if err then def.reject err
-                        else def.resolve cfg
-                else def.resolve cfg
-            def.promise
-        )
-
-        Q.all [ routes, env ]
 # Spawn proxy.
 ).when(
-    ( [ cfg ] ) ->
+    ->
         winston.debug 'Trying to spawn proxy server'
 
         proxy = require 'http-proxy'
 
-        # Create a proxy server listening on port 80 routing to apps in a dynamic `routes` file.
-        proxy.createServer('router': path.resolve(__dirname, './routes.json')).listen(cfg.proxy_port)
-
-        cfg
+        # Create a proxy server.
+        proxy.createServer(router.route).listen(cfg.proxy_port)
 # Spawn haibu.
 ).then(
-    (cfg) ->
+    ->
         winston.debug 'Trying to start haibu drone'
 
         def = Q.defer()
@@ -110,11 +85,11 @@ Q.fcall(
             'port': cfg.haibu_port
             'host': '127.0.0.1'
         , ->
-            def.resolve [ cfg, haibu ]
+            def.resolve haibu
 
         def.promise
 ).then(
-    ([ cfg, haibu ]) ->
+    (haibu) ->
         # Following will be monkey patching the router with our own functionality.
         winston.debug 'Adding custom routes'
 
@@ -127,42 +102,27 @@ Q.fcall(
             if err then def.reject err
             else
                 ( require './ukraine/' + file for file in files )
-                def.resolve [ cfg, haibu ]
+                def.resolve haibu
 
         def.promise
+
 # See which apps have been re-spawned from a previous session and update our routes.
 ).then(
-    ([ cfg, haibu ]) ->
+    (haibu) ->
         winston.debug 'Updating proxy routing table'
 
-        # Traverse running apps.
-        table = {}
-        save = (app_name, app_port) ->
-            # Are we using non standard port? Else leave it out.
-            port = (if (cfg.proxy_port isnt 80) then ":#{cfg.proxy_port}/" else '')
-            
-            # 'Hostname Only' ProxyTable?
-            if cfg.proxy_hostname_only
-                table["#{app_name}.#{cfg.proxy_host}#{port}"] = "127.0.0.1:#{app_port}"
-                # Root app defined?
-                if cfg.root_app and cfg.root_app is app_name
-                    table["#{cfg.proxy_host}#{port}"] = "127.0.0.1:#{app_port}"
-            else
-                table["#{cfg.proxy_host}#{port}#{app_name}/"] = "127.0.0.1:#{app_port}"
+        ( router.update(app.name, app.port) for app in haibu.running.drone.running() )
 
-        ( save(app.name, app.port) for app in haibu.running.drone.running() )
-
+        # Async write the router.
         def = Q.defer()
-
-        # Write the routing table.
-        fs.writeFile path.resolve(__dirname, 'routes.json'), JSON.stringify({ 'router': table, 'hostnameOnly': cfg.proxy_hostname_only }, null, 4), (err) ->
-            if err then def.reject err.message
-            else def.resolve cfg
-
+        router.write (err) ->
+            if err then def.reject err
+            else def.resolve()
         def.promise
+
 # OK or bust.
 ).done(
-    (cfg) ->
+    ->
         # We done.
         winston.info 'haibu'.grey + ' listening on port ' + new String(cfg.haibu_port).bold
         winston.info 'http-proxy'.grey + ' listening on port ' + new String(cfg.proxy_port).bold
@@ -170,4 +130,5 @@ Q.fcall(
         winston.info 'ukraine'.grey + ' started ' + 'ok'.green.bold
     , (err) ->
         winston.error err.message or err
+        process.exit(1)
 )

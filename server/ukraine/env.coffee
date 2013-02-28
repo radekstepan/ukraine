@@ -6,8 +6,8 @@ Q       = require 'q'
 
 haibu = require '../../node_modules/haibu/lib/haibu.js' # direct path to local haibu!
 
-# We request the same file in the main thread.
-CFG = JSON.parse fs.readFileSync(path.resolve(__dirname, '../../config.json')).toString('utf-8')
+# Path to our router.
+{ router } = require path.resolve __dirname, '../ukraine.coffee'
 
 # Haibu only knows apps by name.
 APP_USER = 'chernobyl'
@@ -20,11 +20,13 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
     return Q.fcall( ->
         winston.debug 'Checking for JSON content-type'
         throw 'Incorrect content-type, send JSON' unless req.request.headers['content-type'] is 'application/json'
+    
     # Correct format?
     ).then(
         ->
             winston.debug 'Checking request format'
             throw 'Incorrect {key: "", value: ""} format' unless req.body.key and req.body.value
+    
     # Set in a file.
     ).when(
         ->
@@ -55,6 +57,7 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
                         else def.resolve()
                     def.promise
             )
+    
     # Get the hash and package dir of the running app.
     ).then(
         ->
@@ -63,6 +66,7 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
             for app in haibu.running.drone.running()
                 if app.user is APP_USER and app.name is APP_NAME
                     return [ app.hash, haibu.running.drone.show(APP_NAME).app.directories.home ]
+    
     # Stop the app.
     ).when(
         ([ hash, dir ]) ->
@@ -75,6 +79,7 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
                 else def.resolve [ hash, dir ]
 
             def.promise
+    
     # Get the app's `package.json` file and form an app object.
     ).then(
         ([ hash, dir ]) ->
@@ -92,6 +97,7 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
             pkg.repository = 'type': 'local', 'directory': dir
 
             pkg
+    
     # Deploy it anew.
     ).when(
         (pkg) ->
@@ -104,6 +110,7 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
                 else def.resolve()
 
             def.promise
+    
     # Get the new app's port.
     ).then(
         ->
@@ -113,55 +120,21 @@ haibu.router.post '/env/:name', {} , (APP_NAME) ->
             for app in haibu.running.drone.running()
                 if app.user is APP_USER and app.name is APP_NAME
                     return app.port
+    
     # Update the route to the app with the new port.
     ).when(
         (port) ->
             winston.debug 'Updating proxy routes'
 
-            routes = path.resolve(__dirname, '../routes.json')
+            def = Q.defer()
 
-            # Get the current routes.
-            Q.fcall( ->
-                def = Q.defer()
+            router.update APP_NAME, port
+            router.write (err) ->
+                if err then def.reject err
+                else def.resolve()
 
-                fs.readFile routes, (err, data) ->
-                    if err then def.reject err
-                    def.resolve JSON.parse data
-
-                def.promise
-            # Update.
-            ).then(
-                (old) ->
-                    # Store the new routes here.
-                    rtr = {}
-                    # Update to a new port?
-                    unless (do ->
-                        found = false
-                        for external, internal of old.router
-                            # A new port?
-                            if external.split('/')[1] is APP_NAME
-                                internal = "127.0.0.1:#{port}" ; found = true
-                            # Save it back.
-                            rtr[external] = internal
-                        found
-                    )
-                        # Are we using non standard port? Else leave it out.
-                        p = (if (CFG.proxy_port isnt 80) then ":#{CFG.proxy_port}/" else '')
-                        # 'Hostname Only' ProxyTable?
-                        if CFG.proxy_hostname_only?
-                            rtr["#{APP_NAME}.#{CFG.proxy_host}#{p}"] = "127.0.0.1:#{port}"
-                        else
-                            rtr["#{CFG.proxy_host}#{p}#{APP_NAME}/"] = "127.0.0.1:#{port}"
-                    rtr
-            # Write it.
-            ).when(
-                (rtr) ->
-                    def = Q.defer()
-                    fs.writeFile routes, JSON.stringify({ 'router': rtr, 'hostnameOnly': CFG.proxy_hostname_only }, null, 4), (err) ->
-                        if err then def.reject err
-                        else def.resolve()
-                    def.promise
-            )
+            def.promise
+            
     # OK or bust.
     ).done(
         ->

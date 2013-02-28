@@ -5,7 +5,7 @@ path = require 'path'
 haibu = require '../../node_modules/haibu/lib/haibu.js' # direct path to local haibu!
 
 # We request the same file in the main thread.
-CFG = JSON.parse fs.readFileSync(path.resolve(__dirname, '../../config.json')).toString('utf-8')
+CFG = JSON.parse fs.readFileSync(path.resolve(__dirname, '../../config.json')).toString('utf8')
 
 # Also define authentication on all requests?
 if CFG.auth_token
