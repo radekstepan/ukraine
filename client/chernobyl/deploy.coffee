@@ -109,8 +109,18 @@ task.deploy = (ukraine_ip, app_dir, cfg) ->
             stream = do ->
                 winston.debug 'Sending ' + pkg.name.bold + ' to ' + 'haibu'.grey
                 
-                # Skip fils in `node_modules` directory.
-                filter = (props) -> props.path.indexOf('/node_modules/') is -1
+                # Blacklist these.
+                blacklist = [ 'node_modules', '.git' ]
+                # This is the root.
+                root = path.resolve app_dir
+
+                # Skip blacklisted files & directories.
+                filter = (props) ->
+                    for item in blacklist
+                        if props.path.indexOf(root + '/' + item + '/') is 0
+                            winston.debug 'Skipping ' + props.path.bold
+                            return false
+                    true
 
                 fstream.Reader({ 'path': app_dir, 'type': 'Directory', 'filter': filter })
                 .pipe(tar.Pack({ 'prefix': '.' }))
