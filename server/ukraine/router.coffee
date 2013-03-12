@@ -39,7 +39,7 @@ class Router
     # Route handler.
     route: (req, res, proxy) =>
         # 'Hostname Only' routing.
-        if @hostnameOnly
+        if @hostnameOnly and req.headers.host
             # Traverse all our apps and find an app to match.
             for path, target of @routes
                 # Does the subdomain match?
