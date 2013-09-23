@@ -1,7 +1,7 @@
 ukraine
 =========
 
-Open Source Node.js PaaS with automatic Proxy and CLI client.
+Open Source Node.js PaaS with automatic proxy and cli client.
 
 ``ukraine`` glues ``haibu`` and ``node-http-proxy`` adding a little helper, ``chernobyl``, that deploys into this cloud. It is probably as stable as you think it is.
 
@@ -10,7 +10,7 @@ Open Source Node.js PaaS with automatic Proxy and CLI client.
 Quick start
 -----------
 
-Make sure you have ``node >= 0.8.0`` `installed <https://github.com/joyent/node/blob/master/README.md#to-build>`_, 0.8.15 is recommended as current stable.
+Make sure you have ``node >= 0.8.0`` `installed <https://github.com/joyent/node/blob/master/README.md#to-build>`_.
 
 Install the package globally:
 
