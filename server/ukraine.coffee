@@ -36,13 +36,6 @@ Q.fcall(
 
         def.promise
 
-# Check Node.js version.
-).then(
-    ->
-        winston.debug 'Checking version of Node.js'
-        unless /^v0.8./.test process.version
-            throw "Node.js v0.8.x is allowed only, not #{process.version.bold}"
-
 # Create log directory?
 ).then(
     ->
