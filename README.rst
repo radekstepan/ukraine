@@ -65,7 +65,7 @@ Move to a directory with the app to deploy. Deploy pointing to cloud instance:
 
 .. code-block:: bash
 
-    $ chernobyl deploy <ukraine_ip>
+    $ chernobyl deploy <ukraine_ip> <path_to_app>
 
 Config
 -----------
