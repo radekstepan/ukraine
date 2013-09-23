@@ -113,7 +113,7 @@ chernobyl
 Troubleshooting
 ---------------
 
-Haibu is a poorly written piece of software, be aware of these facts:
+Be aware of these facts re ukraine/haibu:
 
 #. If you intend to use the API haibu exposes, be sure to send correct parameters in the right format, otherwise you will shut down the app.
 #. Your ``package.json`` start script can only include a file name, not a bash command! Haibu checks that whatever you put in there is an existing file. Even more annoyingly, the file needs to be a js file that node can call.
