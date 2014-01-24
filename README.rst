@@ -124,3 +124,9 @@ Be aware of these facts re ukraine/haibu:
 #. Restarting the app does not work as one would expect getting the latest env variables, stopping does not either expecting an ``application`` object instead of the ``name`` it is passed from the service. When setting new environment variable, then, we take a custom approach of stopping a running instance, getting the latest hash of its package and starting it again with these settings.
 
 That is why we use our own version of it since `v0.12.0`
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/radekstepan/ukraine/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
