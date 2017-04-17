@@ -1,0 +1,62 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.7.0
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  'npm:minimatch:20160620':
+    - haibu > npm > minimatch:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > glob > minimatch:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > node-gyp > glob > minimatch:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > read-package-json > glob > minimatch:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > node-gyp > minimatch:
+        patched: '2017-04-17T03:57:47.425Z'
+  'npm:qs:20140806-1':
+    - haibu > union > qs:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > request > qs:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > forever-monitor > broadway > winston > request > qs:
+        patched: '2017-04-17T03:57:47.425Z'
+  'npm:request:20160119':
+    - haibu > winston > request:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > flatiron > broadway > winston > request:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > flatiron > broadway > cliff > winston > request:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > forever-monitor > broadway > cliff > winston > request:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > flatiron > prompt > winston > request:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > request:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > request:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > forever-monitor > broadway > winston > request:
+        patched: '2017-04-17T03:57:47.425Z'
+  'npm:semver:20150403':
+    - haibu > npm > npmconf > semver:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > node-gyp > semver:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > npm-registry-client > semver:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > read-installed > semver:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > semver:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > read-package-json > normalize-package-data > semver:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > init-package-json > semver:
+        patched: '2017-04-17T03:57:47.425Z'
+  'npm:tar:20151103':
+    - haibu > tar:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > tar:
+        patched: '2017-04-17T03:57:47.425Z'
+    - haibu > npm > node-gyp > tar:
+        patched: '2017-04-17T03:57:47.425Z'
